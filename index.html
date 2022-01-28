@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="Trello" />
+  <link rel="stylesheet" href="./fontawesome/css/font-awesome.css">
+  <link rel="stylesheet" href="./css/style.css">
+  <title>Trello</title>
+</head>
+
+<body>
+  <div class="root">
+
+    <div class="list__popup popup none">
+      <div class="list__popup--write">
+        <h2 class="list__popup--title">ADD LIST</h2>
+        <div class="list__input flex">
+          <form action="" name="list__form">
+            <input type="text" name="list">
+          </form>
+        </div>
+        <div class="popup__btns flex">
+          <button class="list__add--btn btn">등록</button>
+          <button class="list__cancel--btn btn">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card__popup popup none">
+      <div class="list__popup--write card__popup--write">
+        <h2 class="list__popup--title">ADD CARD</h2>
+        <div class="img_box"><img src="" alt="" id="card__add--img" onerror="this.src='./img/noimage.png'" ></div>
+        <form action="" name="card__form" class="list__input flex">
+          <input type="text" name="card">
+          <button id="openFile" class="btn" type="button">이미지</button>
+        </form>
+        <div class="popup__btns flex">
+          <button class="card__add--btn btn">등록</button>
+          <button class="card__cancel--btn btn">취소</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="listModify__popup popup none">
+      <div class="listModify__popup--write">
+        <h2 class="listModify__popup--title">MODIFY LIST</h2>
+        <div class="listModify__input flex">
+          <form action="" name="listModify__form">
+            <input type="text" name="listModify">
+          </form>
+        </div>
+        <div class="popup__btns flex">
+          <button class="listModify__add--btn btn">수정</button>
+          <button class="listModify__cancel--btn btn">취소</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container flex">
+
+      <div class="addlist flex">
+        <p>+ Add another list</p>
+      </div>
+    </div>
+  </div>
+  <script src="app/index.js"></script>
+</body>
+
+</html>
