@@ -18,7 +18,8 @@ body{background: var(--main__color); }
 .modify:hover{background: #0279bf; }
 .remove:hover{background: red;}
 .list__container{padding: .5rem 1rem;}
-.list__header{height: 50px; align-items: center; justify-content: space-between;}
+.list__header{height: 50px; padding: 5px; margin-bottom: .75rem; border-radius: 5px; align-items: center; justify-content: space-between; transition: .5s;}
+.list__header:hover{transition: .5s; background: rgb(196, 196, 196);}
 .list__header .list__title{font-weight: 900; color: var(--font__color);}
 .list__footer { height: 50px; margin-top: .75rem; justify-content: space-between; align-items: center; border-radius: 5px; color: rgb(102, 100, 100); font-weight: 600; cursor: pointer; }
 
