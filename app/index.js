@@ -37,6 +37,7 @@ const modifyPopupView = (DataSet) => {
   listModify_popupToggle();
   let listModifyInput = listModify_listModifyForm.listModify;
   listModifyInput.value = list.childNodes[3].childNodes[1].childNodes[1].innerText;
+  menuView(DataSet);
 };
 
 const menuView = (DataSet) =>{
