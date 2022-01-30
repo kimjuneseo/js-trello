@@ -27,21 +27,18 @@ addlistBtn.addEventListener("click",list_popupToggle);
 card_exitBtn.addEventListener("click", card_popupToggle);
 listModify_exitBtn.addEventListener("click", listModify_popupToggle);
 
-const removeList = (DataSet) => {
-  let list = document.querySelector(`.list[data-list='${DataSet}'`);
+const removeList = (list) => {
   list.remove();
 };
 
-const modifyPopupView = (DataSet) => {
-  let list = document.querySelector(`.list[data-list='${DataSet}'`);
+const modifyPopupView = (list) => {
   listModify_popupToggle();
   let listModifyInput = listModify_listModifyForm.listModify;
   listModifyInput.value = list.childNodes[3].childNodes[1].childNodes[1].innerText;
-  menuView(DataSet);
+  menuView(list);
 };
 
-const menuView = (DataSet) =>{
-  let list = document.querySelector(`.list[data-list='${DataSet}'`);
+const menuView = (list) =>{
   list.childNodes[1].classList.toggle('none');
 };
 
@@ -79,13 +76,16 @@ const addList = () => {
   
   boardContainer.childNodes.forEach((el, idx) => {
     el.addEventListener("click", (e) => {
+      let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
       if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
           listDataSet = e.currentTarget.dataset.list;
           card_popupWrap.classList.remove("none");
       }
-      if(e.target.classList.contains("fa-ellipsis-h")) menuView(e.currentTarget.dataset.list);
-      if(e.target.classList.contains("modify"))        modifyPopupView(e.currentTarget.dataset.list);
-      if(e.target.classList.contains("remove"))        removeList(e.currentTarget.dataset.list);
+      if(e.target.classList.contains("fa-ellipsis-h")){ 
+       list.childNodes[1].classList.remove("none");
+      }
+      if(e.target.classList.contains("modify"))        modifyPopupView(list);
+      if(e.target.classList.contains("remove"))        removeList(list);
       });
   })
   list_popupToggle();
