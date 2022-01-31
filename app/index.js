@@ -123,3 +123,4 @@ openFileButton.addEventListener("click", async e => {
   const mediaUrl = urlCreator.createObjectURL(file);
   image.src = mediaUrl;
 });
+d
