@@ -43,12 +43,10 @@ const menuView = (list) =>{
 };
 
 let dataSetCnt = 0;
-let listArr = [];
 let listDataSet;
 const addList = () => {
   let title = list_listForm.list.value;
   dataSetCnt++;
-  listArr.push(dataSetCnt);
 
   if(title !== ''){
     const list = createEl('div');
@@ -73,21 +71,26 @@ const addList = () => {
     addlistBtn.before(list);
     list_listForm.reset();
   };
-  
-  boardContainer.childNodes.forEach((el, idx) => {
+  let i = 0;
+  boardContainer.childNodes.forEach(el => {
     el.addEventListener("click", (e) => {
+      i++
       let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
       if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
-          listDataSet = e.currentTarget.dataset.list;
-          card_popupWrap.classList.remove("none");
+        listDataSet = e.currentTarget.dataset.list;
+        card_popupWrap.classList.remove("none");
       }
       if(e.target.classList.contains("fa-ellipsis-h")){ 
-       list.childNodes[1].classList.remove("none");
+        menuView(list);
       }
-      if(e.target.classList.contains("modify"))        modifyPopupView(list);
-      if(e.target.classList.contains("remove"))        removeList(list);
+      if(e.target.classList.contains("modify")) modifyPopupView(list);
+      if(e.target.classList.contains("remove")) removeList(list);
+      if(i === 1) {
+        i = 0;
+        return;
+      }
       });
-  })
+  });
   list_popupToggle();
 };
 
@@ -98,7 +101,7 @@ const addCard = () => {
     if(image.src == 'http://127.0.0.1:5500/img/noimage.png'){
       list.childNodes[3].childNodes[3].innerHTML += `<div class="card">${card_input}</div>`;
     }else{
-      list.childNodes[3].childNodes[3].innerHTML += `<div class="card"><img src="${image.src}" alt="" id="card__add--img">${card_input}</div>`;
+      list.childNodes[3].childNodes[3].innerHTML += `<div class="card"><img src="${image.src}" alt="card__img" id="card__add--img">${card_input}</div>`;
     }
     image.src = '';
     card_cardForm.reset();
@@ -108,7 +111,6 @@ const addCard = () => {
 
 const modifyList = () => {
   listModify_popupToggle();
-  
 };
 
 list_addBtn.addEventListener("click", addList);
