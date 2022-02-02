@@ -71,24 +71,19 @@ const addList = () => {
     addlistBtn.before(list);
     list_listForm.reset();
   };
-  let i = 0;
-  if(i > 1) {
-    boardContainer.childNodes.forEach(el => {
-      el.addEventListener("click", (e) => {
-        i++;
+
+  boardContainer.childNodes.forEach(el => {
+    el.addEventListener("click", (e) => {
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
         if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
           listDataSet = e.currentTarget.dataset.list;
           card_popupWrap.classList.remove("none");
         }
-        if(e.target.classList.contains("fa-ellipsis-h")){ 
-          menuView(list);
-        }
+        if(e.target.classList.contains("fa-ellipsis-h"))menuView(list);
         if(e.target.classList.contains("modify")) modifyPopupView(list);
         if(e.target.classList.contains("remove")) removeList(list);
       });
     });
-  }
   list_popupToggle();
 };
 
@@ -119,3 +114,65 @@ openFileButton.addEventListener("click", async e => {
   const mediaUrl = urlCreator.createObjectURL(file);
   image.src = mediaUrl;
 });
+
+const viewNotes = () => {
+
+  const tx = db.transaction("personal_notes","readonly")
+  const pNotes = tx.objectStore("personal_notes")
+  const request = pNotes.openCursor()
+  request.onsuccess = e => {
+
+      const cursor = e.target.result
+
+      if (cursor) {
+          alert(`Title: ${cursor.key} Text: ${cursor.value.text} `)
+          //do something with the cursor
+          cursor.continue()
+      }
+  }
+
+}
+
+const addNote = () => {
+
+  const note = {
+      title: "note" + Math.random(),
+      text: "This is my note"
+  }
+
+  const tx = db.transaction("personal_notes", "readwrite")
+  tx.onerror = e => alert( ` Error! ${e.target.error}  `)
+  const pNotes = tx.objectStore("personal_notes")
+  pNotes.add(note)
+}
+
+const createDB = (dbName, dbVersion) => {
+
+  const request = indexedDB.open(dbName,dbVersion)
+
+      //on upgrade needed
+      request.onupgradeneeded = e => {
+          db = e.target.result
+         /* note = {
+              title: "note1",
+              text: "this is a note"
+          }*/
+          const pNotes = db.createObjectStore("personal_notes", {keyPath: "title"})
+          const todoNotes = db.createObjectStore("todo_notes", {keyPath: "title"})
+         
+         alert(`upgrade is called database name: ${db.name} version : ${db.version}`)
+
+      }
+      //on success 
+      request.onsuccess = e => {
+          db = e.target.result
+          alert(`success is called database name: ${db.name} version : ${db.version}`)
+      }
+      //on error
+      request.onerror = e => {
+          alert(`error: ${e.target.error} was found `)
+           
+      }
+
+
+}
