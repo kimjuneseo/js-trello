@@ -72,25 +72,23 @@ const addList = () => {
     list_listForm.reset();
   };
   let i = 0;
-  boardContainer.childNodes.forEach(el => {
-    el.addEventListener("click", (e) => {
-      i++
-      let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-      if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
-        listDataSet = e.currentTarget.dataset.list;
-        card_popupWrap.classList.remove("none");
-      }
-      if(e.target.classList.contains("fa-ellipsis-h")){ 
-        menuView(list);
-      }
-      if(e.target.classList.contains("modify")) modifyPopupView(list);
-      if(e.target.classList.contains("remove")) removeList(list);
-      if(i === 1) {
-        i = 0;
-        return;
-      }
+  if(i > 1) {
+    boardContainer.childNodes.forEach(el => {
+      el.addEventListener("click", (e) => {
+        i++;
+        let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
+        if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
+          listDataSet = e.currentTarget.dataset.list;
+          card_popupWrap.classList.remove("none");
+        }
+        if(e.target.classList.contains("fa-ellipsis-h")){ 
+          menuView(list);
+        }
+        if(e.target.classList.contains("modify")) modifyPopupView(list);
+        if(e.target.classList.contains("remove")) removeList(list);
       });
-  });
+    });
+  }
   list_popupToggle();
 };
 
@@ -98,11 +96,7 @@ const addCard = () => {
   let card_input = card_cardForm.card.value;
   if(card_input !== ''){
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
-    if(image.src == 'http://127.0.0.1:5500/img/noimage.png'){
-      list.childNodes[3].childNodes[3].innerHTML += `<div class="card">${card_input}</div>`;
-    }else{
-      list.childNodes[3].childNodes[3].innerHTML += `<div class="card"><img src="${image.src}" alt="card__img" id="card__add--img">${card_input}</div>`;
-    }
+    list.childNodes[3].childNodes[3].innerHTML += image.src == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card">${card_input}</div>` : `<div class="card"><img src="${image.src}" alt="card__img" id="card__add--img">${card_input}</div>`
     image.src = '';
     card_cardForm.reset();
     card_popupToggle();
