@@ -26,8 +26,9 @@ let cardView_listModifyForm = document.cardView__form;
 // method
 const createEl = (el) => document.createElement(el);
 const list_popupToggle = () => list_popupWrap.classList.toggle("none");
-const card_popupToggle = () => card_popupWrap.classList.toggle("none");
 const listModify_popupToggle = () => listModify_popupWrap.classList.toggle("none");
+const card_popupToggle = () => card_popupWrap.classList.toggle("none");
+const cardView_popupToggle = () => cardView_popupWrap.classList.toggle("none");
 // popup toggle
 list_exitBtn.addEventListener("click", list_popupToggle);
 addlistBtn.addEventListener("click",list_popupToggle);
@@ -50,7 +51,6 @@ const removeList = (list) => {
   if(list){
     DBDeleteList(list.dataset.list)
     list.remove();
-
   }
 };
 
@@ -58,10 +58,26 @@ const modifyList = () => {
   listModify_popupToggle();
 };
 
+//card Chage
+cardView_popupWrap.addEventListener("click", e => {
+  
+});
+console.log();
+
 
 const viewCard = (list) => {
-
-}
+  cardView_popupWrap.classList.remove("none");
+  let data = DBFetch('trello__card', list);
+  data.onsuccess = e => {
+    cardView_listModifyForm.childNodes.forEach(e => {
+      if(e.classList){
+        if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
+        if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
+        if(e.classList.contains('cardView__view--content'))data.result.content == '' ? e.innerText = '설명을 입력해주세요..' : e.innerText= data.result.content;
+      }
+    })
+  }
+};
 
 // Trello 
 let targetListNum;
@@ -110,7 +126,11 @@ const addList = (listDataSet, listTitle) => {
         }
         
         // cardView
-        if(e.target.classList.contains("card")) viewCard(list);
+        if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
+          
+          viewCard(e.target.dataset.card);
+          
+        }
 
       });
     });
@@ -128,7 +148,7 @@ const addListListener = () => {
 const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
     if(cardTitle !== ''){
       let list = document.querySelector(`.list[data-list='${listDataSet}'`);
-      list.childNodes[3].childNodes[3].innerHTML += cardImg == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img src="${cardImg}" alt="card__img" id="card__add--img">${cardTitle}</div>`
+      list.childNodes[3].childNodes[3].innerHTML += cardImg == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -138,7 +158,7 @@ const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
 const addCardListener = () => {
     card_popupToggle();
     let card_title = card_cardForm.card.value;
-    DBAdd('trello__card', targetListNum, card_title, image.src);
+    DBAdd('trello__card', targetListNum, card_title, image.src , '');
     addCard(targetListNum, card_title, image.src)
 };
 
@@ -165,8 +185,8 @@ const DBCreate = () => {
 }; 
 DBCreate()
 
-const DBAdd = (tableName, dataSet, title, image) => {
-  const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image} 
+const DBAdd = (tableName, dataSet, title, image, content) => {
+  const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image, content} 
   const tx = db.transaction(tableName, "readwrite");
   tx.onerror = e => console.log(`Error! ${e.target.error}`);
   const table = tx.objectStore(tableName);
@@ -189,7 +209,7 @@ const DBDeleteList = (key) => {
   }
 };
 
-DBDeleteCard = (key) => {
+const DBDeleteCard = (key) => {
   const request = indexedDB.open('Trello', 1)
   request.onerror = e => console.log("Fail!!delete");
   
@@ -210,23 +230,30 @@ DBDeleteCard = (key) => {
   }
 };
 
+const DBFetch = (name, key) => {
+  key = parseInt(key);
+  const pNotes = db.transaction(name).objectStore(name);
+  const request = pNotes.get(key);
+  let result;
+  return request;
+}
 // init
 const init = (name) => {
   const tx = db.transaction(name,"readonly");
   const pNotes = tx.objectStore(name);
   const request = pNotes.openCursor();
   request.onsuccess = e => {
-      const cursor = e.target.result;
-      if (cursor) {
-        if(name === 'trello__list'){
-          dataSetCnt = cursor.key;
-          addList(dataSetCnt, cursor.value.title);
-        }else{
-          cardCnt = cursor.key;
-          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
-        }
-        cursor.continue();
+    const cursor = e.target.result;
+    if (cursor) {
+      if(name === 'trello__list'){
+        dataSetCnt = cursor.key;
+        addList(dataSetCnt, cursor.value.title);
+      }else{
+        cardCnt = cursor.key;
+        addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
       }
+      cursor.continue();
+    }
   };
 };
 
@@ -237,11 +264,11 @@ listModify_addBtn.addEventListener("click", modifyList);
 const openFileButton = document.querySelector("#openFile"); 
 const base64File = (file) =>{
   let reader = new FileReader();
-
+  
   reader.onload = function () {
-     let result = reader.result;
-     image.src = result
-     return result;
+    let result = reader.result;
+    image.src = result
+    return result;
   };
   reader.readAsDataURL( file ); 
 };
