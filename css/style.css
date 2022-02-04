@@ -44,7 +44,7 @@ body{background: var(--main__color); }
 .list__popup--write .list__input input,
 .listModify__popup--write .listModify__input input{width: 250px; height: 30px; padding: 10px; border-radius: 5px; border: 2px solid #000;}
 
-.list__add--btn{background: blue; color: #fff;}
+.list__add--btn, .cardView__add--btn{background: blue; color: #fff;}
 .list__popup--title{ color: blue; }
 .popup{z-index: 200;}
 .none{display: none;}
@@ -63,8 +63,8 @@ img{width: 100%; height: 100%; }
 .fa-ellipsis-h:hover{transition: .5s; background: #999;}
 .card__add--btn{background: blue; color: #fff;}
 
-
-.cardView__popup--write{min-height: 500px; min-width: 400px;  margin: 10% auto; flex-direction: column; justify-content: space-around;}
-.cardView__form{min-height: 350px;}
-.cardView__form--title{width: 100%;}
+.cardView__popup--write{min-height: 550px; min-width: 400px;  margin: 10% auto; flex-direction: column; justify-content: space-around;}
+.cardView__form{min-height: 450px;}
+.cardView__form--title{font-size: 2rem; font-weight: 900; width: 100%;}
+.cardView__form--img{min-width: 300px; min-height: 230px;}
 .cardView__view--content{min-width: 100%; min-height: 100px; }

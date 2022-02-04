@@ -22,7 +22,7 @@ const cardView_popupWrap = document.querySelector(".cardView__popup");
 const cardView_exitBtn = document.querySelector(".cardView__cancel--btn");
 const cardView_addBtn = document.querySelector(".cardView__add--btn");
 let cardView_listModifyForm = document.cardView__form;
-
+let cardViewImage = document.querySelector('.cardView__form--img')
 // method
 const createEl = (el) => document.createElement(el);
 const list_popupToggle = () => list_popupWrap.classList.toggle("none");
@@ -34,6 +34,7 @@ list_exitBtn.addEventListener("click", list_popupToggle);
 addlistBtn.addEventListener("click",list_popupToggle);
 card_exitBtn.addEventListener("click", card_popupToggle);
 listModify_exitBtn.addEventListener("click", listModify_popupToggle);
+cardView_exitBtn.addEventListener("click", cardView_popupToggle);
 let cardCnt = 0;
 // list Change
 const menuView = (list) =>{
@@ -59,11 +60,17 @@ const modifyList = () => {
 };
 
 //card Chage
-cardView_popupWrap.addEventListener("click", e => {
-  
+cardView_listModifyForm.addEventListener("click", e => {
+  console.log(e);
+  if(e.target.classList.contains('cardView__form--title')) {
+    e.target.remove();
+    let input =  createEl('input');
+    input.setAttribute('type', 'text')
+    input.setAttribute('value', e.target.innerText)
+    input.classList
+    cardViewImage.before(input)
+  }
 });
-console.log();
-
 
 const viewCard = (list) => {
   cardView_popupWrap.classList.remove("none");
@@ -73,10 +80,14 @@ const viewCard = (list) => {
       if(e.classList){
         if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
         if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
-        if(e.classList.contains('cardView__view--content'))data.result.content == '' ? e.innerText = '설명을 입력해주세요..' : e.innerText= data.result.content;
+        if(e.classList.contains('cardView__view--content'))data.result.content ==='' ? e.innerText = '설명을 입력해주세요..' : e.innerText= data.result.content;
       }
     })
   }
+};
+
+const modifyCard = () => {
+  
 };
 
 // Trello 
@@ -110,28 +121,20 @@ const addList = (listDataSet, listTitle) => {
   boardContainer.childNodes.forEach(el => {
     el.addEventListener("click", (e) => {
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
+
         //list menu
         if(e.target.classList.contains("fa-ellipsis-h"))menuView(list);
-        
         //list modify
         if(e.target.classList.contains("modify")) modifyPopupView(list);
-        
         // list remove
         if(e.target.classList.contains("remove")) removeList(list);
-        
-        //card add
-         if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
-          card_popupWrap.classList.remove("none");
-          targetListNum = e.currentTarget.dataset.list;
-        }
-        
         // cardView
-        if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
-          
-          viewCard(e.target.dataset.card);
-          
+        if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) viewCard(e.target.dataset.card);
+        //card add
+        if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
+           card_popupWrap.classList.remove("none");
+           targetListNum = e.currentTarget.dataset.list;
         }
-
       });
     });
   };
@@ -148,10 +151,12 @@ const addListListener = () => {
 const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
     if(cardTitle !== ''){
       let list = document.querySelector(`.list[data-list='${listDataSet}'`);
-      list.childNodes[3].childNodes[3].innerHTML += cardImg == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`
-      image.src = '';
-      card_cardForm.reset();
-      cardCnt++;
+      if(list){
+        list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`
+        image.src = '';
+        card_cardForm.reset();
+        cardCnt++;
+      }
     }
 };
   
@@ -195,9 +200,8 @@ const DBAdd = (tableName, dataSet, title, image, content) => {
 };
 
 const DBDeleteList = (key) => {
-  const request = indexedDB.open('Trello', 1)
-  request.onerror = e => console.log("Fail!!delete");
   key = parseInt(key);
+  const request = indexedDB.open('Trello', 1)
   request.onsuccess = e => {
     let db = e.target.result;
     let transaction = db.transaction("trello__list", "readwrite");
@@ -210,9 +214,8 @@ const DBDeleteList = (key) => {
 };
 
 const DBDeleteCard = (key) => {
+  key = parseInt(key);
   const request = indexedDB.open('Trello', 1)
-  request.onerror = e => console.log("Fail!!delete");
-  
   request.onsuccess = e => {
     let db = e.target.result;
     let transaction = db.transaction("trello__card", 'readwrite');
@@ -221,7 +224,7 @@ const DBDeleteCard = (key) => {
     request.onsuccess = e => {
         const cursor = e.target.result;
         if (cursor) {
-         if(cursor.value.dataSet == key){
+         if(cursor.value.dataSet === key){
            cursor.delete();
          }
           cursor.continue();
@@ -234,9 +237,9 @@ const DBFetch = (name, key) => {
   key = parseInt(key);
   const pNotes = db.transaction(name).objectStore(name);
   const request = pNotes.get(key);
-  let result;
   return request;
-}
+};
+
 // init
 const init = (name) => {
   const tx = db.transaction(name,"readonly");
@@ -260,6 +263,7 @@ const init = (name) => {
 list_addBtn.addEventListener("click", addListListener);
 card_addBtn.addEventListener("click", addCardListener);
 listModify_addBtn.addEventListener("click", modifyList);
+cardView_addBtn.addEventListener("click", modifyCard);
 
 const openFileButton = document.querySelector("#openFile"); 
 const base64File = (file) =>{
@@ -275,5 +279,5 @@ const base64File = (file) =>{
 
 openFileButton.addEventListener("change",(e) => {
   base64File(e.target.files[0])
-})
+});
 
