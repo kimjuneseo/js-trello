@@ -28,9 +28,7 @@ card_exitBtn.addEventListener("click", card_popupToggle);
 listModify_exitBtn.addEventListener("click", listModify_popupToggle);
 let cardCnt = 0;
 // list Change
-const removeList = (list) => {
-  list.remove();
-};
+
 const modifyPopupView = (list) => {
   listModify_popupToggle();
   let listModifyInput = listModify_listModifyForm.listModify;
@@ -94,10 +92,11 @@ const addList = (listDataSet, listTitle) => {
   };
   
 
-  const addCard = (listDataSet, cardTitle, cardImg) => {
+  const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
+    console.log();
     if(cardTitle !== ''){
       let list = document.querySelector(`.list[data-list='${listDataSet}'`);
-      list.childNodes[3].childNodes[3].innerHTML += cardImg == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card">${cardTitle}</div>` : `<div class="card"><img src="${cardImg}" alt="card__img" id="card__add--img">${cardTitle}</div>`
+      list.childNodes[3].childNodes[3].innerHTML += cardImg == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img src="${cardImg}" alt="card__img" id="card__add--img">${cardTitle}</div>`
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -119,9 +118,8 @@ const modifyList = () => {
 // DB METHOD
 let db = null;
 let dataSetCnt = 0;
-const DBCreate = (dbName, dbVersion) => {
-  const request = indexedDB.open(dbName,dbVersion);
-
+const DBCreate = () => {
+  const request = indexedDB.open('Trello', 1)
       request.onupgradeneeded = e => {
           db = e.target.result;
           const pNotes = db.createObjectStore("trello__list", {keyPath: "dataSet"});
@@ -132,8 +130,8 @@ const DBCreate = (dbName, dbVersion) => {
       request.onsuccess = e => {
           db = e.target.result;
           console.log(`success is called database name: ${db.name} version : ${db.version}`);
-          viewLists("trello__list");
-          viewLists("trello__card");
+          initLists("trello__list");
+          initLists("trello__card");
       }
       
       request.onerror = e => {
@@ -150,7 +148,51 @@ const DBAdd = (tableName, dataSet, title, image) => {
 
 };
 
-const viewLists = (name) => {
+const DBDeleteList = (key) => {
+  const request = indexedDB.open('Trello', 1)
+  request.onerror = e => console.log("Fail!!delete");
+  key = parseInt(key);
+  request.onsuccess = e => {
+    let db = e.target.result;
+    let transaction = db.transaction("trello__list", "readwrite");
+    
+    let objectStore = transaction.objectStore("trello__list");
+    let deleteRequest = objectStore.delete(key);
+    deleteRequest.onsuccess = e => console.log("delete");
+    DBDeleteCard(key);
+  }
+};
+
+DBDeleteCard = (key) => {
+  const request = indexedDB.open('Trello', 1)
+  request.onerror = e => console.log("Fail!!delete");
+  
+  request.onsuccess = e => {
+    let db = e.target.result;
+    let transaction = db.transaction("trello__card", 'readwrite');
+    const pNotes = transaction.objectStore("trello__card");
+    const request = pNotes.openCursor();
+    request.onsuccess = e => {
+        const cursor = e.target.result;
+        if (cursor) {
+         if(cursor.value.dataSet == key){
+           cursor.delete();
+         }
+          cursor.continue();
+        }
+    };
+  }
+};
+
+const removeList = (list) => {
+  if(list){
+    DBDeleteList(list.dataset.list)
+    list.remove();
+
+  }
+};
+
+const initLists = (name) => {
   const tx = db.transaction(name,"readonly");
   const pNotes = tx.objectStore(name);
   const request = pNotes.openCursor();
@@ -162,7 +204,7 @@ const viewLists = (name) => {
           addList(dataSetCnt, cursor.value.title);
         }else{
           cardCnt = cursor.key;
-          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image);
+          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
         }
         cursor.continue();
       }
@@ -170,9 +212,7 @@ const viewLists = (name) => {
 };
 
 // init
-const init = (() => {
-  DBCreate('Trello', 1);
-})();
+const init = (() => DBCreate())();
 
 list_addBtn.addEventListener("click", addListListener);
 card_addBtn.addEventListener("click", addCardListener);
