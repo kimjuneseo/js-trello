@@ -1,3 +1,4 @@
+
 const addlistBtn = document.querySelector(".addlist");
 let boardContainer = document.querySelector(".container");
 // add list popup
@@ -16,6 +17,12 @@ const listModify_popupWrap = document.querySelector(".listModify__popup");
 const listModify_exitBtn = document.querySelector(".listModify__cancel--btn");
 const listModify_addBtn = document.querySelector(".listModify__add--btn");
 let listModify_listModifyForm = document.listModify__form;
+//cardView popup
+const cardView_popupWrap = document.querySelector(".cardView__popup");
+const cardView_exitBtn = document.querySelector(".cardView__cancel--btn");
+const cardView_addBtn = document.querySelector(".cardView__add--btn");
+let cardView_listModifyForm = document.cardView__form;
+
 // method
 const createEl = (el) => document.createElement(el);
 const list_popupToggle = () => list_popupWrap.classList.toggle("none");
@@ -28,6 +35,9 @@ card_exitBtn.addEventListener("click", card_popupToggle);
 listModify_exitBtn.addEventListener("click", listModify_popupToggle);
 let cardCnt = 0;
 // list Change
+const menuView = (list) =>{
+  list.childNodes[1].classList.toggle('none');
+};
 
 const modifyPopupView = (list) => {
   listModify_popupToggle();
@@ -35,11 +45,26 @@ const modifyPopupView = (list) => {
   listModifyInput.value = list.childNodes[3].childNodes[1].childNodes[1].innerText;
   menuView(list);
 };
-const menuView = (list) =>{
-  list.childNodes[1].classList.toggle('none');
+
+const removeList = (list) => {
+  if(list){
+    DBDeleteList(list.dataset.list)
+    list.remove();
+
+  }
 };
 
+const modifyList = () => {
+  listModify_popupToggle();
+};
+
+
+const viewCard = (list) => {
+
+}
+
 // Trello 
+let targetListNum;
 const addList = (listDataSet, listTitle) => {
   console.log("addList");
   if(listTitle !== ''){
@@ -66,34 +91,41 @@ const addList = (listDataSet, listTitle) => {
     list_listForm.reset();
   };
   
-
   boardContainer.childNodes.forEach(el => {
     el.addEventListener("click", (e) => {
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-
-        if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
+        //list menu
+        if(e.target.classList.contains("fa-ellipsis-h"))menuView(list);
+        
+        //list modify
+        if(e.target.classList.contains("modify")) modifyPopupView(list);
+        
+        // list remove
+        if(e.target.classList.contains("remove")) removeList(list);
+        
+        //card add
+         if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
           card_popupWrap.classList.remove("none");
           targetListNum = e.currentTarget.dataset.list;
         }
-        if(e.target.classList.contains("fa-ellipsis-h"))menuView(list);
-        if(e.target.classList.contains("modify")) modifyPopupView(list);
-        if(e.target.classList.contains("remove")) removeList(list);
+        
+        // cardView
+        if(e.target.classList.contains("card")) viewCard(list);
+
       });
     });
-  }
-  
-  let targetListNum;
-  const addListListener = () => {
+  };
+
+
+const addListListener = () => {
     let title = list_listForm.list.value;
     dataSetCnt++;
     addList(dataSetCnt, title);
     DBAdd('trello__list' ,dataSetCnt, title);
     list_popupToggle();
-  };
+};
   
-
-  const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
-    console.log();
+const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
     if(cardTitle !== ''){
       let list = document.querySelector(`.list[data-list='${listDataSet}'`);
       list.childNodes[3].childNodes[3].innerHTML += cardImg == 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img src="${cardImg}" alt="card__img" id="card__add--img">${cardTitle}</div>`
@@ -101,19 +133,15 @@ const addList = (listDataSet, listTitle) => {
       card_cardForm.reset();
       cardCnt++;
     }
-  }
+};
   
-  const addCardListener = () => {
+const addCardListener = () => {
     card_popupToggle();
     let card_title = card_cardForm.card.value;
     DBAdd('trello__card', targetListNum, card_title, image.src);
     addCard(targetListNum, card_title, image.src)
-    
 };
 
-const modifyList = () => {
-  listModify_popupToggle();
-};
 
 // DB METHOD
 let db = null;
@@ -130,14 +158,12 @@ const DBCreate = () => {
       request.onsuccess = e => {
           db = e.target.result;
           console.log(`success is called database name: ${db.name} version : ${db.version}`);
-          initLists("trello__list");
-          initLists("trello__card");
+          init("trello__list");
+          init("trello__card");
       }
       
-      request.onerror = e => {
-          console.log(`error: ${e.target.error} was found `);
-      }
-};
+}; 
+DBCreate()
 
 const DBAdd = (tableName, dataSet, title, image) => {
   const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image} 
@@ -184,15 +210,8 @@ DBDeleteCard = (key) => {
   }
 };
 
-const removeList = (list) => {
-  if(list){
-    DBDeleteList(list.dataset.list)
-    list.remove();
-
-  }
-};
-
-const initLists = (name) => {
+// init
+const init = (name) => {
   const tx = db.transaction(name,"readonly");
   const pNotes = tx.objectStore(name);
   const request = pNotes.openCursor();
@@ -211,13 +230,9 @@ const initLists = (name) => {
   };
 };
 
-// init
-const init = (() => DBCreate())();
-
 list_addBtn.addEventListener("click", addListListener);
 card_addBtn.addEventListener("click", addCardListener);
 listModify_addBtn.addEventListener("click", modifyList);
-
 
 const openFileButton = document.querySelector("#openFile"); 
 const base64File = (file) =>{

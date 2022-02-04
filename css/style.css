@@ -31,8 +31,10 @@ body{background: var(--main__color); }
 
 .list__popup,
 .card__popup,
-.listModify__popup{width: 100%; height: 100%;  position: fixed; background: rgba(61, 61, 61, 0.596);}
+.listModify__popup,
+.cardView__popup{width: 100%; height: 100%;  position: fixed; background: rgba(61, 61, 61, 0.596);}
   
+
 .list__popup--write,
 .listModify__popup--write{ width: 300px; height: 200px; margin: 15% auto; padding: .5rem; left: 0; right: 0; position: absolute; border-radius: 5px; background: #fff;}
  
@@ -60,3 +62,9 @@ img{width: 100%; height: 100%; }
 .fa-ellipsis-h{padding: 4px; border-radius: 5px; transition: .5s;}
 .fa-ellipsis-h:hover{transition: .5s; background: #999;}
 .card__add--btn{background: blue; color: #fff;}
+
+
+.cardView__popup--write{min-height: 500px; min-width: 400px;  margin: 10% auto; flex-direction: column; justify-content: space-around;}
+.cardView__form{min-height: 350px;}
+.cardView__form--title{width: 100%;}
+.cardView__content{min-width: 100%; min-height: 100px; }
