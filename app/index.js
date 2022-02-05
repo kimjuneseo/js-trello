@@ -239,7 +239,7 @@ const DBFetch = (name, key) => {
   const request = pNotes.get(key);
   return request;
 };
-
+   
 // init
 const init = (name) => {
   const tx = db.transaction(name,"readonly");
