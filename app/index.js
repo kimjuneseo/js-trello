@@ -50,7 +50,7 @@ const modifyPopupView = (list) => {
 
 const removeList = (list) => {
   if(list){
-    DBDeleteList(list.dataset.list)
+    DBDeleteList(list.dataset.list);
     list.remove();
   }
 };
@@ -65,10 +65,10 @@ cardView_listModifyForm.addEventListener("click", e => {
   if(e.target.classList.contains('cardView__form--title')) {
     e.target.remove();
     let input =  createEl('input');
-    input.setAttribute('type', 'text')
-    input.setAttribute('value', e.target.innerText)
-    input.classList
-    cardViewImage.before(input)
+    input.setAttribute('type', 'text');
+    input.setAttribute('value', e.target.innerText);
+    input.classList;
+    cardViewImage.before(input);
   }
 });
 
@@ -148,11 +148,11 @@ const addListListener = () => {
     list_popupToggle();
 };
   
-const addCard = (listDataSet, cardTitle, cardImg, cardDataSet) => {
+const addCard = (listDataSet, cardTitle, cardImg) => {
     if(cardTitle !== ''){
       let list = document.querySelector(`.list[data-list='${listDataSet}'`);
       if(list){
-        list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`
+        list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`;
         image.src = '';
         card_cardForm.reset();
         cardCnt++;
@@ -164,7 +164,7 @@ const addCardListener = () => {
     card_popupToggle();
     let card_title = card_cardForm.card.value;
     DBAdd('trello__card', targetListNum, card_title, image.src , '');
-    addCard(targetListNum, card_title, image.src)
+    addCard(targetListNum, card_title, image.src);
 };
 
 
@@ -188,7 +188,7 @@ const DBCreate = () => {
       }
       
 }; 
-DBCreate()
+DBCreate();
 
 const DBAdd = (tableName, dataSet, title, image, content) => {
   const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image, content} 
@@ -271,13 +271,13 @@ const base64File = (file) =>{
   
   reader.onload = function () {
     let result = reader.result;
-    image.src = result
+    image.src = result;
     return result;
   };
   reader.readAsDataURL( file ); 
 };
 
 openFileButton.addEventListener("change",(e) => {
-  base64File(e.target.files[0])
+  base64File(e.target.files[0]);
 });
 
