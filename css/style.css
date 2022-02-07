@@ -66,7 +66,8 @@ img{width: 100%; height: 100%; }
 .cardView__popup--write{min-height: 550px; min-width: 400px;  margin: 10% auto; flex-direction: column; justify-content: space-around;}
 .cardView__form{min-height: 450px;}
 .cardView__form--title{font-size: 2rem; font-weight: 900; width: 100%;}
-.cardView__form--img{min-width: 300px; min-height: 230px;}
+.cardView__form--img{min-width: 100%; min-height: 230px;}
 .cardView__view--content{min-width: 100%; min-height: 100px; }
-.cardView__popup--title{min-width: 100%; min-height: 42px; font-size: 1.5rem; font-weight: 600;}
-.cardView__popup-content{min-width: 100%; min-height: 100px;  font-family: 'FontAwesome'; font-size: 1rem;}
+.cardView__popup--title{min-width: 100%; min-height: 42px; font-size: 1.5rem; font-weight: 600; border: none !important;}
+.cardView__popup-content{min-width: 100%; min-height: 100px; padding-top: 0;  font-family: 'FontAwesome'; font-size: 1rem; border: none !important ;}
+#cardViewopenFile{border: none; height: 40px;}

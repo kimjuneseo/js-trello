@@ -1,87 +1,57 @@
-
 const addlistBtn = document.querySelector(".addlist");
+addlistBtn.addEventListener("click", e =>  list_popupWrap.classList.toggle("none"));
 let boardContainer = document.querySelector(".container");
 // add list popup
 const list_popupWrap = document.querySelector(".list__popup");
-const list_exitBtn = document.querySelector(".list__cancel--btn");
-const list_addBtn = document.querySelector(".list__add--btn");
 const list_listForm = document.list__form;
 //add card popup
 const card_popupWrap = document.querySelector(".card__popup");
-const card_exitBtn = document.querySelector(".card__cancel--btn");
-const card_addBtn = document.querySelector(".card__add--btn");
 const card_cardForm = document.card__form;
 let image = document.querySelector("#card__add--img");
-// modify list popup
-const listModify_popupWrap = document.querySelector(".listModify__popup");
-const listModify_exitBtn = document.querySelector(".listModify__cancel--btn");
-const listModify_addBtn = document.querySelector(".listModify__add--btn");
-let listModify_listModifyForm = document.listModify__form;
+const openFileButton = document.querySelector("#openFile"); 
 //cardView popup
 const cardView_popupWrap = document.querySelector(".cardView__popup");
-const cardView_exitBtn = document.querySelector(".cardView__cancel--btn");
-const cardView_addBtn = document.querySelector(".cardView__add--btn");
 let cardView_listModifyForm = document.cardView__form;
 let cardViewImage = document.querySelector('.cardView__form--img')
-// method
+const cardViewOpenFileButton = document.querySelector("#cardViewopenFile");
+
 const createEl = (el) => document.createElement(el);
-const list_popupToggle = () => list_popupWrap.classList.toggle("none");
-const listModify_popupToggle = () => listModify_popupWrap.classList.toggle("none");
-const card_popupToggle = () => card_popupWrap.classList.toggle("none");
-const cardView_popupToggle = () => cardView_popupWrap.classList.toggle("none");
-// popup toggle
-list_exitBtn.addEventListener("click", list_popupToggle);
-addlistBtn.addEventListener("click",list_popupToggle);
-card_exitBtn.addEventListener("click", card_popupToggle);
-listModify_exitBtn.addEventListener("click", listModify_popupToggle);
-cardView_exitBtn.addEventListener("click", cardView_popupToggle);
-let cardCnt = 0;
+
 // list Change
-const menuView = (list) =>{
-  list.childNodes[1].classList.toggle('none');
+let cardCnt = 0;
+const addListListener = () => {
+  let title = list_listForm.list.value;
+  dataSetCnt++;
+  addList(dataSetCnt, title);
+  DBAdd('trello__list' ,dataSetCnt, title);
+  list_popupWrap.classList.toggle("none");
 };
 
-const modifyPopupView = (list) => {
-  listModify_popupToggle();
-  let listModifyInput = listModify_listModifyForm.listModify;
-  listModifyInput.value = list.childNodes[3].childNodes[1].childNodes[1].innerText;
-  menuView(list);
-};
 
-const removeList = (list) => {
-  if(list){
-    DBDeleteList(list.dataset.list);
-    list.remove();
-  }
-};
-
-const modifyList = () => {
-  listModify_popupToggle();
-};
 
 //card Chage
-cardView_listModifyForm.addEventListener("click", e => {
-  if(e.target.classList.contains('cardView__form--title')){
-    let input = elementChange(e.target, 'input');
-    input.classList.add('cardView__popup--title')
-    console.log(input);
-    cardViewImage.before(input);
-    return;
-    }
-  if(e.target.classList.contains('cardView__view--content')){
-    let input = elementChange(e.target, 'textarea');
-    input.classList.add('cardView__popup-content')
-    cardView_listModifyForm.appendChild(input);
-  }
-});
+const base64File = (file) =>{
+  let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
+  let reader = new FileReader();
+  reader.onload = function () {
+    let result = reader.result;
+    img.src = result;
+    return result;
+  };
+  reader.readAsDataURL( file ); 
+};
 
-const elementChange = (target, el) => {
+const elementChange = (target) => {
   target.remove();
-  let element =  createEl(el);
-  element.setAttribute('type', 'text');
-  element.setAttribute('value', target.innerText);
-  element.innerText = target.innerText
-  return element;
+  let input =  createEl('input');
+  input.setAttribute('type', 'text');
+  input.setAttribute('value', target.innerText);
+  input.addEventListener("keydown", e => {
+    if(window.event.keyCode === 13){
+      input.blur();
+    }
+  })
+  return input;
 };
 
 const viewCard = (list) => {
@@ -112,7 +82,6 @@ const addList = (listDataSet, listTitle) => {
     list.dataset.list = listDataSet;
     list.innerHTML += `
     <div class="list__menu--wrap none">
-      <div class="modify">수정</div>
       <div class="remove">삭제</div>
     </div>
     <div class="list__container" >
@@ -129,37 +98,37 @@ const addList = (listDataSet, listTitle) => {
     addlistBtn.before(list);
     list_listForm.reset();
   };
-  
+
   boardContainer.childNodes.forEach(el => {
     el.addEventListener("click", (e) => {
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-
         //list menu
-        if(e.target.classList.contains("fa-ellipsis-h"))menuView(list);
-        //list modify
-        if(e.target.classList.contains("modify")) modifyPopupView(list);
+        if(e.target.classList.contains("fa-ellipsis-h")){
+          list.childNodes[1].classList.toggle('none');
+          return;
+        }
         // list remove
-        if(e.target.classList.contains("remove")) removeList(list);
+        if(e.target.classList.contains("remove")){
+          DBDeleteList(list.dataset.list);
+          list.remove();
+          return;
+        }
         // cardView
-        if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) viewCard(e.target.dataset.card);
+        if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
+          viewCard(e.target.dataset.card);
+          return;
+        }
         //card add
         if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
            card_popupWrap.classList.remove("none");
            targetListNum = e.currentTarget.dataset.list;
+           return;
         }
       });
     });
   };
 
 
-const addListListener = () => {
-    let title = list_listForm.list.value;
-    dataSetCnt++;
-    addList(dataSetCnt, title);
-    DBAdd('trello__list' ,dataSetCnt, title);
-    list_popupToggle();
-};
-  
 const addCard = (listDataSet, cardTitle, cardImg) => {
     if(cardTitle !== ''){
       let list = document.querySelector(`.list[data-list='${listDataSet}'`);
@@ -173,12 +142,11 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
 };
   
 const addCardListener = () => {
-    card_popupToggle();
+    card_popupWrap.classList.toggle("none");
     let card_title = card_cardForm.card.value;
     DBAdd('trello__card', targetListNum, card_title, image.src , '');
     addCard(targetListNum, card_title, image.src);
 };
-
 
 // DB METHOD
 let db = null;
@@ -234,62 +202,92 @@ const DBDeleteCard = (key) => {
     const pNotes = transaction.objectStore("trello__card");
     const request = pNotes.openCursor();
     request.onsuccess = e => {
-        const cursor = e.target.result;
+      const cursor = e.target.result;
         if (cursor) {
-         if(cursor.value.dataSet === key){
-           cursor.delete();
-         }
+          if(cursor.value.dataSet === key){
+            cursor.delete();
+          }
           cursor.continue();
         }
-    };
-  }
-};
-
-const DBFetch = (name, key) => {
-  key = parseInt(key);
-  const pNotes = db.transaction(name).objectStore(name);
-  const request = pNotes.get(key);
-  return request;
-};
-   
-// init
-const init = (name) => {
-  const tx = db.transaction(name,"readonly");
-  const pNotes = tx.objectStore(name);
-  const request = pNotes.openCursor();
-  request.onsuccess = e => {
-    const cursor = e.target.result;
-    if (cursor) {
-      if(name === 'trello__list'){
-        dataSetCnt = cursor.key;
-        addList(dataSetCnt, cursor.value.title);
-      }else{
-        cardCnt = cursor.key;
-        addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
-      }
-      cursor.continue();
+      };
     }
   };
-};
-
-list_addBtn.addEventListener("click", addListListener);
-card_addBtn.addEventListener("click", addCardListener);
-listModify_addBtn.addEventListener("click", modifyList);
-cardView_addBtn.addEventListener("click", modifyCard);
-
-const openFileButton = document.querySelector("#openFile"); 
-const base64File = (file) =>{
-  let reader = new FileReader();
   
-  reader.onload = function () {
-    let result = reader.result;
-    image.src = result;
-    return result;
+  const DBFetch = (name, key) => {
+    key = parseInt(key);
+    const pNotes = db.transaction(name).objectStore(name);
+    const request = pNotes.get(key);
+    return request;
   };
-  reader.readAsDataURL( file ); 
-};
+  
+  // init
+  const init = (name) => {
+    const tx = db.transaction(name,"readonly");
+    const pNotes = tx.objectStore(name);
+    const request = pNotes.openCursor();
+    request.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        if(name === 'trello__list'){
+          dataSetCnt = cursor.key;
+          addList(dataSetCnt, cursor.value.title);
+        }else{
+          cardCnt = cursor.key;
+          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
+        }
+        cursor.continue();
+      }
+    };
+  };
+  
+  list_popupWrap.addEventListener("click", e => {
+  if(e.target.classList.contains('list__cancel--btn')){
+    list_popupWrap.classList.toggle("none");
+    return;
+  }
+  if(e.target.classList.contains('list__add--btn')){
+    addListListener();
+    return;
+  }
+});
 
-openFileButton.addEventListener("change",(e) => {
-  base64File(e.target.files[0]);
+cardViewOpenFileButton.addEventListener('change' , e => base64File(e.target.files[0]));
+cardView_popupWrap.addEventListener("click", e => {
+  if(e.target.classList.contains('cardView__form--title')){
+    let input = elementChange(e.target);
+    input.classList.add('cardView__popup--title')
+    cardViewImage.before(input);
+    input.focus();
+    return;
+  }
+  
+  if(e.target.classList.contains('cardView__view--content')){
+    let input = elementChange(e.target);
+    input.classList.add('cardView__popup-content')
+    cardView_listModifyForm.appendChild(input);
+    input.focus();
+    return;
+  }
+  
+  if(e.target.classList.contains('cardView__add--btn')){
+    console.log('add');
+  }
+  
+  if(e.target.classList.contains('cardView__cancel--btn')){
+    cardView_popupWrap.classList.toggle('none');
+    return;
+  }
+});
+
+openFileButton.addEventListener("change",(e) => base64File(e.target.files[0]));
+card_popupWrap.addEventListener('click', e => {
+  if(e.target.classList.contains('card__cancel--btn')){
+    card_popupWrap.classList.toggle("none");
+    return;
+  }
+  if(e.target.classList.contains('card__add--btn')){
+    addCardListener();
+    return;
+  }
 });
 
