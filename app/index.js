@@ -59,28 +59,34 @@ const addList = (listDataSet, listTitle) => {
     list_listForm.reset();
   };
   listChk();
-  };
+};
   
-
 //card method
-const base64File = (file) =>{
+let cardDataSet;
+const base64File = (file, db) =>{
   let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
   let reader = new FileReader();
   reader.onload = function () {
     let result = reader.result;
     img.src = result;
+    console.log(db);
+    if(db){
+      console.log(123);
+      DBCardModify(cardDataSet, 'image', result);
+    }
     return result;
   };
   reader.readAsDataURL( file ); 
 };
 
-const elementChange = (target) => {
+const elementChange = (target, keyName) => {
   target.remove();
   let input =  createEl('input');
   input.setAttribute('type', 'text');
   input.setAttribute('value', target.innerText);
   input.addEventListener("keydown", e => {
     if(window.event.keyCode === 13){
+      DBCardModify(cardDataSet, keyName, input.value);
       input.blur();
     }
   })
@@ -101,12 +107,11 @@ const viewCard = (list) => {
   }
 };
 
-
 const addCard = (listDataSet, cardTitle, cardImg) => {
   if(cardTitle !== ''){
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`;
+      list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p>${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -121,10 +126,6 @@ const addCardListener = () => {
   addCard(targetListNum, card_title, image.src);
 };
 
-const modifyCard = () => {
-  
-};
-
 // DB METHOD
 let db = null;
 let dataSetCnt = 0;
@@ -136,14 +137,12 @@ const DBCreate = () => {
           const todoNotes = db.createObjectStore("trello__card",{keyPath: "cardCnt"});
          console.log(`upgrade is called database name: ${db.name} version : ${db.version}`);
       }
-
       request.onsuccess = e => {
           db = e.target.result;
           console.log(`success is called database name: ${db.name} version : ${db.version}`);
           init("trello__list");
           init("trello__card");
       }
-      
 }; 
 DBCreate();
 
@@ -153,7 +152,6 @@ const DBAdd = (tableName, dataSet, title, image, content) => {
   tx.onerror = e => console.log(`Error! ${e.target.error}`);
   const table = tx.objectStore(tableName);
   table.add(data);
-
 };
 
 const DBDeleteList = (key) => {
@@ -190,6 +188,33 @@ const DBDeleteCard = (key) => {
     }
   };
   
+  const DBCardModify = (key, name, value) => {
+    key = parseInt(key);
+    const request = indexedDB.open('Trello', 1);
+    request.onsuccess = e => {
+      let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
+      let request = objectStore.get(key);
+      request.onsuccess = e => {
+        let data = e.target.result;
+        let card = document.querySelector(`.card[data-card='${key}'`);
+        console.log();
+        if(name === 'title') {
+          data.title = value;
+          card.childNodes[1].innerText = value;
+        }
+        if(name === 'content') data.content = value;
+        if(name === 'image'){
+          card.childNodes[0].src = value;
+          data.image = value;
+        }
+        let requestUpdate = objectStore.put(data);
+         requestUpdate.onsuccess = function(event) {
+         };
+      };
+      
+    }
+  }
+
   const DBFetch = (name, key) => {
     key = parseInt(key);
     const pNotes = db.transaction(name).objectStore(name);
@@ -199,6 +224,7 @@ const DBDeleteCard = (key) => {
   
   // init
   const init = (name) => {
+    
     const tx = db.transaction(name,"readonly");
     const pNotes = tx.objectStore(name);
     const request = pNotes.openCursor();
@@ -216,7 +242,7 @@ const DBDeleteCard = (key) => {
       }
     };
   };
-  
+
   const listEventListener = ()=> {
     if(list){
       list.forEach(el => {
@@ -236,6 +262,7 @@ const DBDeleteCard = (key) => {
           // cardView
           if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
             viewCard(e.target.dataset.card);
+            cardDataSet = e.target.dataset.card;
             return;
           }
           //card add
@@ -260,10 +287,11 @@ const DBDeleteCard = (key) => {
   }
 });
 
-cardViewOpenFileButton.addEventListener('change' , e => base64File(e.target.files[0]));
+cardViewOpenFileButton.addEventListener("change", e => base64File(e.target.files[0], true));
 cardView_popupWrap.addEventListener("click", e => {
-  if(e.target.classList.contains('cardView__form--title')){
-    let input = elementChange(e.target);
+  
+  if(e.target.classList.contains("cardView__form--title")){
+    let input = elementChange(e.target, "title");
     input.classList.add('cardView__popup--title')
     cardViewImage.before(input);
     input.focus();
@@ -271,7 +299,7 @@ cardView_popupWrap.addEventListener("click", e => {
   }
   
   if(e.target.classList.contains('cardView__view--content')){
-    let input = elementChange(e.target);
+    let input = elementChange(e.target, 'content');
     input.classList.add('cardView__popup-content')
     cardView_listModifyForm.appendChild(input);
     input.focus();
