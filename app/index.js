@@ -61,16 +61,28 @@ const modifyList = () => {
 
 //card Chage
 cardView_listModifyForm.addEventListener("click", e => {
-  console.log(e);
-  if(e.target.classList.contains('cardView__form--title')) {
-    e.target.remove();
-    let input =  createEl('input');
-    input.setAttribute('type', 'text');
-    input.setAttribute('value', e.target.innerText);
-    input.classList;
+  if(e.target.classList.contains('cardView__form--title')){
+    let input = elementChange(e.target, 'input');
+    input.classList.add('cardView__popup--title')
+    console.log(input);
     cardViewImage.before(input);
+    return;
+    }
+  if(e.target.classList.contains('cardView__view--content')){
+    let input = elementChange(e.target, 'textarea');
+    input.classList.add('cardView__popup-content')
+    cardView_listModifyForm.appendChild(input);
   }
 });
+
+const elementChange = (target, el) => {
+  target.remove();
+  let element =  createEl(el);
+  element.setAttribute('type', 'text');
+  element.setAttribute('value', target.innerText);
+  element.innerText = target.innerText
+  return element;
+};
 
 const viewCard = (list) => {
   cardView_popupWrap.classList.remove("none");

@@ -68,3 +68,5 @@ img{width: 100%; height: 100%; }
 .cardView__form--title{font-size: 2rem; font-weight: 900; width: 100%;}
 .cardView__form--img{min-width: 300px; min-height: 230px;}
 .cardView__view--content{min-width: 100%; min-height: 100px; }
+.cardView__popup--title{min-width: 100%; min-height: 42px; font-size: 1.5rem; font-weight: 600;}
+.cardView__popup-content{min-width: 100%; min-height: 100px;  font-family: 'FontAwesome'; font-size: 1rem;}
