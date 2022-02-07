@@ -87,7 +87,10 @@ const elementChange = (target, keyName) => {
       DBCardModify(cardDataSet, keyName, input.value);
       input.blur();
     }
-  })
+  });
+  input.addEventListener("blur", e => {
+    DBCardModify(cardDataSet, keyName, input.value);
+  });
   return input;
 };
 
@@ -201,13 +204,17 @@ const DBDeleteCard = (key, cardCnt) => {
           data.title = value;
           card.childNodes[1].innerText = value;
         }
+        
         if(name === 'content') data.content = value;
+        
         if(name === 'image'){
           card.childNodes[0].src = value;
           data.image = value;
         }
+        
         let requestUpdate = objectStore.put(data);
-         requestUpdate.onsuccess = function(event) {
+         requestUpdate.onsuccess = () => {
+           console.log('update');
          };
       };
       
@@ -247,11 +254,6 @@ const DBDeleteCard = (key, cardCnt) => {
         el.addEventListener("click", (e) => {
           let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
           if(list){
-            //list menu
-            if(e.target.classList.contains("fa-ellipsis-h")){
-              // list.childNodes[1].classList.toggle('none');
-              return;
-            }
             // list remove
             if(e.target.classList.contains("remove")){
               DBDeleteList(list.dataset.list);
