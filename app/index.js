@@ -30,29 +30,29 @@ const addListListener = () => {
 let list;
 const listChk = () => {
   list = document.querySelectorAll('.list')
-  listEventListener();
+  listEventListener(list);
 };
 
 let targetListNum;
 const addList = (listDataSet, listTitle) => {
-  console.log("addList");
   if(listTitle !== ''){
     const list = createEl('div');
     list.classList.add('list', 'grid');
     list.dataset.list = listDataSet;
     list.innerHTML += `
+    <input type="checkbox" id="list__menu${listDataSet}" class="list__input_chk">
     <div class="list__menu--wrap none">
       <div class="remove">삭제</div>
     </div>
     <div class="list__container" >
       <div class="list__header flex">
         <p class="list__title">${listTitle}</p>
-        <div class="list__menu"><i class=" fa-ellipsis-h fa"></i></div>
+        <label for="list__menu${listDataSet}" class="list__menu"><i class=" fa-ellipsis-h fa"></i></label>
       </div>
       <div class="cards grid"></div>
       <div class="list__footer flex">
         <div class="list__footer--txt">+ Add a card</div>
-        <i class="fa fa-copy"></i>
+      <i class="fa fa-copy"></i>
       </div>
     </div> `;
     addlistBtn.before(list);
@@ -69,14 +69,12 @@ const base64File = (file, db) =>{
   reader.onload = function () {
     let result = reader.result;
     img.src = result;
-    console.log(db);
     if(db){
-      console.log(123);
       DBCardModify(cardDataSet, 'image', result);
     }
     return result;
   };
-  reader.readAsDataURL( file ); 
+  reader.readAsDataURL(file); 
 };
 
 const elementChange = (target, keyName) => {
@@ -111,7 +109,7 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
   if(cardTitle !== ''){
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p>${cardTitle}</p></div>`;
+      list.childNodes[5].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p>${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -168,7 +166,7 @@ const DBDeleteList = (key) => {
   }
 };
 
-const DBDeleteCard = (key) => {
+const DBDeleteCard = (key, cardCnt) => {
   key = parseInt(key);
   const request = indexedDB.open('Trello', 1)
   request.onsuccess = e => {
@@ -178,10 +176,12 @@ const DBDeleteCard = (key) => {
     const request = pNotes.openCursor();
     request.onsuccess = e => {
       const cursor = e.target.result;
-        if (cursor) {
-          if(cursor.value.dataSet === key){
-            cursor.delete();
-          }
+      if (cursor) {
+        if(cardCnt){
+          if(cursor.key === key) cursor.delete();
+        } 
+
+        if(cursor.value.dataSet === key) cursor.delete();
           cursor.continue();
         }
       };
@@ -197,7 +197,6 @@ const DBDeleteCard = (key) => {
       request.onsuccess = e => {
         let data = e.target.result;
         let card = document.querySelector(`.card[data-card='${key}'`);
-        console.log();
         if(name === 'title') {
           data.title = value;
           card.childNodes[1].innerText = value;
@@ -223,8 +222,7 @@ const DBDeleteCard = (key) => {
   };
   
   // init
-  const init = (name) => {
-    
+  const init = (name) => { 
     const tx = db.transaction(name,"readonly");
     const pNotes = tx.objectStore(name);
     const request = pNotes.openCursor();
@@ -243,38 +241,40 @@ const DBDeleteCard = (key) => {
     };
   };
 
-  const listEventListener = ()=> {
+  const listEventListener = (list)=> {
     if(list){
       list.forEach(el => {
         el.addEventListener("click", (e) => {
           let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-          //list menu
-          if(e.target.classList.contains("fa-ellipsis-h")){
-            list.childNodes[1].classList.toggle('none');
-            return;
-          }
-          // list remove
-          if(e.target.classList.contains("remove")){
-            DBDeleteList(list.dataset.list);
-            list.remove();
-            return;
-          }
-          // cardView
-          if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
-            viewCard(e.target.dataset.card);
-            cardDataSet = e.target.dataset.card;
-            return;
-          }
-          //card add
-          if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
-            card_popupWrap.classList.remove("none");
-            targetListNum = e.currentTarget.dataset.list;
-            return;
+          if(list){
+            //list menu
+            if(e.target.classList.contains("fa-ellipsis-h")){
+              // list.childNodes[1].classList.toggle('none');
+              return;
+            }
+            // list remove
+            if(e.target.classList.contains("remove")){
+              DBDeleteList(list.dataset.list);
+              list.remove();
+              return;
+            }
+            // cardView
+            if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
+              viewCard(e.target.dataset.card);
+              cardDataSet = e.target.dataset.card;
+              return;
+            }
+            //card add
+            if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
+              card_popupWrap.classList.remove("none");
+              targetListNum = e.currentTarget.dataset.list;
+              return;
+            }
           }
       });
       });
     }
-  }
+  };
 
   list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
@@ -289,7 +289,6 @@ const DBDeleteCard = (key) => {
 
 cardViewOpenFileButton.addEventListener("change", e => base64File(e.target.files[0], true));
 cardView_popupWrap.addEventListener("click", e => {
-  
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
     input.classList.add('cardView__popup--title')
@@ -307,7 +306,11 @@ cardView_popupWrap.addEventListener("click", e => {
   }
   
   if(e.target.classList.contains('cardView__add--btn')){
-    console.log('add');
+    cardView_popupWrap.classList.toggle('none');
+    DBDeleteCard(cardDataSet, true);
+    let card = document.querySelector(`.card[data-card='${cardDataSet}'`);
+    card.remove();
+    return;
   }
   
   if(e.target.classList.contains('cardView__cancel--btn')){
