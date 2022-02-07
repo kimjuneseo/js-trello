@@ -17,7 +17,7 @@ const cardViewOpenFileButton = document.querySelector("#cardViewopenFile");
 
 const createEl = (el) => document.createElement(el);
 
-// list Change
+// list method
 let cardCnt = 0;
 const addListListener = () => {
   let title = list_listForm.list.value;
@@ -27,9 +27,42 @@ const addListListener = () => {
   list_popupWrap.classList.toggle("none");
 };
 
+let list;
+const listChk = () => {
+  list = document.querySelectorAll('.list')
+  listEventListener();
+};
 
+let targetListNum;
+const addList = (listDataSet, listTitle) => {
+  console.log("addList");
+  if(listTitle !== ''){
+    const list = createEl('div');
+    list.classList.add('list', 'grid');
+    list.dataset.list = listDataSet;
+    list.innerHTML += `
+    <div class="list__menu--wrap none">
+      <div class="remove">삭제</div>
+    </div>
+    <div class="list__container" >
+      <div class="list__header flex">
+        <p class="list__title">${listTitle}</p>
+        <div class="list__menu"><i class=" fa-ellipsis-h fa"></i></div>
+      </div>
+      <div class="cards grid"></div>
+      <div class="list__footer flex">
+        <div class="list__footer--txt">+ Add a card</div>
+        <i class="fa fa-copy"></i>
+      </div>
+    </div> `;
+    addlistBtn.before(list);
+    list_listForm.reset();
+  };
+  listChk();
+  };
+  
 
-//card Chage
+//card method
 const base64File = (file) =>{
   let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
   let reader = new FileReader();
@@ -68,84 +101,28 @@ const viewCard = (list) => {
   }
 };
 
-const modifyCard = () => {
-  
-};
-
-// Trello 
-let targetListNum;
-const addList = (listDataSet, listTitle) => {
-  console.log("addList");
-  if(listTitle !== ''){
-    const list = createEl('div');
-    list.classList.add('list', 'grid');
-    list.dataset.list = listDataSet;
-    list.innerHTML += `
-    <div class="list__menu--wrap none">
-      <div class="remove">삭제</div>
-    </div>
-    <div class="list__container" >
-      <div class="list__header flex">
-        <p class="list__title">${listTitle}</p>
-        <div class="list__menu"><i class=" fa-ellipsis-h fa"></i></div>
-      </div>
-      <div class="cards grid"></div>
-      <div class="list__footer flex">
-        <div class="list__footer--txt">+ Add a card</div>
-        <i class="fa fa-copy"></i>
-      </div>
-    </div> `;
-    addlistBtn.before(list);
-    list_listForm.reset();
-  };
-
-  boardContainer.childNodes.forEach(el => {
-    el.addEventListener("click", (e) => {
-        let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-        //list menu
-        if(e.target.classList.contains("fa-ellipsis-h")){
-          list.childNodes[1].classList.toggle('none');
-          return;
-        }
-        // list remove
-        if(e.target.classList.contains("remove")){
-          DBDeleteList(list.dataset.list);
-          list.remove();
-          return;
-        }
-        // cardView
-        if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
-          viewCard(e.target.dataset.card);
-          return;
-        }
-        //card add
-        if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
-           card_popupWrap.classList.remove("none");
-           targetListNum = e.currentTarget.dataset.list;
-           return;
-        }
-      });
-    });
-  };
-
 
 const addCard = (listDataSet, cardTitle, cardImg) => {
-    if(cardTitle !== ''){
-      let list = document.querySelector(`.list[data-list='${listDataSet}'`);
-      if(list){
-        list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`;
-        image.src = '';
-        card_cardForm.reset();
-        cardCnt++;
-      }
+  if(cardTitle !== ''){
+    let list = document.querySelector(`.list[data-list='${listDataSet}'`);
+    if(list){
+      list.childNodes[3].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img">${cardTitle}</div>`;
+      image.src = '';
+      card_cardForm.reset();
+      cardCnt++;
     }
+  }
 };
-  
+
 const addCardListener = () => {
-    card_popupWrap.classList.toggle("none");
-    let card_title = card_cardForm.card.value;
-    DBAdd('trello__card', targetListNum, card_title, image.src , '');
-    addCard(targetListNum, card_title, image.src);
+  card_popupWrap.classList.toggle("none");
+  let card_title = card_cardForm.card.value;
+  DBAdd('trello__card', targetListNum, card_title, image.src , '');
+  addCard(targetListNum, card_title, image.src);
+};
+
+const modifyCard = () => {
+  
 };
 
 // DB METHOD
@@ -240,6 +217,38 @@ const DBDeleteCard = (key) => {
     };
   };
   
+  const listEventListener = ()=> {
+    if(list){
+      list.forEach(el => {
+        el.addEventListener("click", (e) => {
+          let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
+          //list menu
+          if(e.target.classList.contains("fa-ellipsis-h")){
+            list.childNodes[1].classList.toggle('none');
+            return;
+          }
+          // list remove
+          if(e.target.classList.contains("remove")){
+            DBDeleteList(list.dataset.list);
+            list.remove();
+            return;
+          }
+          // cardView
+          if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
+            viewCard(e.target.dataset.card);
+            return;
+          }
+          //card add
+          if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
+            card_popupWrap.classList.remove("none");
+            targetListNum = e.currentTarget.dataset.list;
+            return;
+          }
+      });
+      });
+    }
+  }
+
   list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
     list_popupWrap.classList.toggle("none");
