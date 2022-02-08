@@ -63,7 +63,7 @@ const addList = (listDataSet, listTitle) => {
   
 //card method
 let cardDataSet;
-const base64File = (file, db) =>{
+const onBase64File = (file, db) =>{
   let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
   let reader = new FileReader();
   reader.onload = function () {
@@ -102,7 +102,9 @@ const viewCard = (list) => {
       if(e.classList){
         if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
         if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
-        if(e.classList.contains('cardView__view--content'))data.result.content ==='' ? e.innerText = '설명을 입력해주세요..' : e.innerText= data.result.content;
+        if(e.classList.contains('cardView__view--content')) e.innerText =  data.result.content;
+        // data.result.content ==='' ? '설명을 입력해주세요..' : 
+        console.log(data.result.content);
       }
     })
   }
@@ -228,26 +230,6 @@ const DBDeleteCard = (key, cardCnt) => {
     return request;
   };
   
-  // init
-  const init = (name) => { 
-    const tx = db.transaction(name,"readonly");
-    const pNotes = tx.objectStore(name);
-    const request = pNotes.openCursor();
-    request.onsuccess = e => {
-      const cursor = e.target.result;
-      if (cursor) {
-        if(name === 'trello__list'){
-          dataSetCnt = cursor.key;
-          addList(dataSetCnt, cursor.value.title);
-        }else{
-          cardCnt = cursor.key;
-          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
-        }
-        cursor.continue();
-      }
-    };
-  };
-
   const listEventListener = (list)=> {
     if(list){
       list.forEach(el => {
@@ -289,7 +271,7 @@ const DBDeleteCard = (key, cardCnt) => {
   }
 });
 
-cardViewOpenFileButton.addEventListener("change", e => base64File(e.target.files[0], true));
+cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 cardView_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
@@ -317,11 +299,12 @@ cardView_popupWrap.addEventListener("click", e => {
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
+    window.location.reload();
     return;
   }
 });
 
-openFileButton.addEventListener("change",(e) => base64File(e.target.files[0]));
+openFileButton.addEventListener("change",(e) => onBase64File(e.target.files[0]));
 card_popupWrap.addEventListener('click', e => {
   if(e.target.classList.contains('card__cancel--btn')){
     card_popupWrap.classList.toggle("none");
@@ -333,3 +316,22 @@ card_popupWrap.addEventListener('click', e => {
   }
 });
 
+  // init
+  const init = (name) => { 
+    const tx = db.transaction(name,"readonly");
+    const pNotes = tx.objectStore(name);
+    const request = pNotes.openCursor();
+    request.onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        if(name === 'trello__list'){
+          dataSetCnt = cursor.key;
+          addList(dataSetCnt, cursor.value.title);
+        }else{
+          cardCnt = cursor.key;
+          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
+        }
+        cursor.continue();
+      }
+    };
+  };
