@@ -102,9 +102,7 @@ const viewCard = (list) => {
       if(e.classList){
         if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
         if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
-        if(e.classList.contains('cardView__view--content')) e.innerText =  data.result.content;
-        // data.result.content ==='' ? '설명을 입력해주세요..' : 
-        console.log(data.result.content);
+        if(e.classList.contains('cardView__view--content')) e.innerText = data.result.content ==='' ? '설명을 입력해주세요..' :  data.result.content;
       }
     })
   }
@@ -255,7 +253,9 @@ const DBDeleteCard = (key, cardCnt) => {
               return;
             }
           }
-      });
+        });
+
+        el.addEventListener("dragover",e => e.preventDefault())
       });
     }
   };
