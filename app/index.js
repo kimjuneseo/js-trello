@@ -112,7 +112,7 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
   if(cardTitle !== ''){
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      list.childNodes[5].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}">${cardTitle}</div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p>${cardTitle}</p></div>`;
+      list.childNodes[5].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}" draggable="false"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" draggable="false" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -228,6 +228,13 @@ const DBDeleteCard = (key, cardCnt) => {
     return request;
   };
   
+  //drag and drop
+  const onDragover = (e) => {
+    if(e.target.classList.contains('cards') || e.target.classList.contains('card')){
+      e.preventDefault();
+    }
+  };
+
   const listEventListener = (list)=> {
     if(list){
       list.forEach(el => {
@@ -241,7 +248,7 @@ const DBDeleteCard = (key, cardCnt) => {
               return;
             }
             // cardView
-            if(e.target.classList.contains("card") || e.target.classList.contains("card__img")) {
+            if(e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) {
               viewCard(e.target.dataset.card);
               cardDataSet = e.target.dataset.card;
               return;
@@ -255,11 +262,44 @@ const DBDeleteCard = (key, cardCnt) => {
           }
         });
 
-        el.addEventListener("dragover",e => e.preventDefault())
       });
     }
   };
+  let chkClick = false;
+  let layerX;
+  let layerY;
+  let moveCard
+  window.addEventListener("mousedown", e => {
+    if(e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) {
+      moveCard = document.querySelector(`.card[data-card='${e.target.dataset.card}']`);
+      chkClick = true;
+      moveCard.style.position = 'absolute'
+      moveCard.style.zIndex= 99;
+    }
+    if(chkClick){
+      e.preventDefault();
+      boardContainer.addEventListener("mousemove", e => {
+        console.log(e.pageX, e.pageY);
+        if(moveCard){
+          moveCard.style.left =  `${e.pageX}px`;
+          moveCard.style.top =   `${e.pageY}px`;  
+          
+        }
+      });
+    }
+  });
 
+
+  window.addEventListener("mouseup", e => {
+    if((e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) && chkClick) {
+      moveCard.style.position = ''
+      moveCard.style.left =0;
+      moveCard.style.top = 0; 
+    }
+    chkClick = false;
+    
+  })
+  
   list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
     list_popupWrap.classList.toggle("none");
