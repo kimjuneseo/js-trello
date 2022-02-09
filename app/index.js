@@ -49,7 +49,7 @@ const addList = (listDataSet, listTitle) => {
         <p class="list__title">${listTitle}</p>
         <label for="list__menu${listDataSet}" class="list__menu"><i class=" fa-ellipsis-h fa"></i></label>
       </div>
-      <div class="cards grid"></div>
+      <div class="cards flex"></div>
       <div class="list__footer flex">
         <div class="list__footer--txt">+ Add a card</div>
       <i class="fa fa-copy"></i>
@@ -227,13 +227,6 @@ const DBDeleteCard = (key, cardCnt) => {
     const request = pNotes.get(key);
     return request;
   };
-  
-  //drag and drop
-  const onDragover = (e) => {
-    if(e.target.classList.contains('cards') || e.target.classList.contains('card')){
-      e.preventDefault();
-    }
-  };
 
   const listEventListener = (list)=> {
     if(list){
@@ -262,10 +255,28 @@ const DBDeleteCard = (key, cardCnt) => {
           }
         });
 
+        let originalHeigt = 0;
+        el.addEventListener("mouseover", e => {
+          if((e.target.classList.contains("cards") || e.target.classList.contains("list__container") ||e.target.classList.contains("list__footer") ) && moveCard) {
+             originalHeigt = originalHeigt === 0 ? e.currentTarget.childNodes[5].childNodes[3].offsetHeight : originalHeigt;
+             e.currentTarget.childNodes[5].childNodes[3].style.height = originalHeigt + moveCard.offsetHeight + 'px';
+            }
+          });
+          
+          el.addEventListener("mouseleave", e => {
+            if(e.target.classList.contains("list") && moveCard) {
+              e.target.childNodes[5].childNodes[3].style.height = originalHeigt + 'px';
+              console.log(originalHeigt);
+              // originalHeigt = 0;
+            }
+          });
       });
     }
   };
-  
+
+  let layerX;
+  let layerY;
+  let moveCard
   const throttle = (callback, limit = 100) => {
     let waiting = false;
     return function() {
@@ -276,34 +287,36 @@ const DBDeleteCard = (key, cardCnt) => {
           }
         };
   };
-  let chkClick = false;
-  let layerX;
-  let layerY;
-  let moveCard
+
   window.addEventListener("mousedown", e => {
     if(e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) {
       e.preventDefault();
       moveCard = document.querySelector(`.card[data-card='${e.target.dataset.card}']`);
       layerX = e.target.offsetWidth/2;
       layerY = e.target.offsetHeight/2;
-      moveCard.style.position = 'absolute'
+      moveCard.style.position = 'absolute';
       moveCard.style.zIndex= 99;
     }
-    });
+  });
+  
   window.addEventListener("mousemove", throttle((e) => {
     if(moveCard){
       moveCard.style.left =  `${e.pageX - layerX}px`;
       moveCard.style.top =   `${e.pageY - layerY}px`;  
     }
   },100));
-
+  
   window.addEventListener("mouseup", e => {
-      moveCard.style.position = ''
+    if(moveCard){
+      console.log(e.currentTarget);
+      moveCard.style.position = '';
       moveCard.style.left =0;
       moveCard.style.top = 0; 
-  })
+      moveCard.style.zIndex= 0;
+      moveCard = ''
+    }
+  });
 
-  
   list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
     list_popupWrap.classList.toggle("none");
