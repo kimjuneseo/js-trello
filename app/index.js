@@ -265,40 +265,44 @@ const DBDeleteCard = (key, cardCnt) => {
       });
     }
   };
+  
+  const throttle = (callback, limit = 100) => {
+    let waiting = false;
+    return function() {
+        if(!waiting) {
+            callback.apply(this, arguments);
+            waiting = true;
+            setTimeout(() => waiting = false , limit)
+          }
+        };
+  };
   let chkClick = false;
   let layerX;
   let layerY;
   let moveCard
   window.addEventListener("mousedown", e => {
     if(e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) {
+      e.preventDefault();
       moveCard = document.querySelector(`.card[data-card='${e.target.dataset.card}']`);
-      chkClick = true;
+      layerX = e.target.offsetWidth/2;
+      layerY = e.target.offsetHeight/2;
       moveCard.style.position = 'absolute'
       moveCard.style.zIndex= 99;
     }
-    if(chkClick){
-      e.preventDefault();
-      boardContainer.addEventListener("mousemove", e => {
-        console.log(e.pageX, e.pageY);
-        if(moveCard){
-          moveCard.style.left =  `${e.pageX}px`;
-          moveCard.style.top =   `${e.pageY}px`;  
-          
-        }
-      });
+    });
+  window.addEventListener("mousemove", throttle((e) => {
+    if(moveCard){
+      moveCard.style.left =  `${e.pageX - layerX}px`;
+      moveCard.style.top =   `${e.pageY - layerY}px`;  
     }
-  });
-
+  },100));
 
   window.addEventListener("mouseup", e => {
-    if((e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) && chkClick) {
       moveCard.style.position = ''
       moveCard.style.left =0;
       moveCard.style.top = 0; 
-    }
-    chkClick = false;
-    
   })
+
   
   list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
@@ -339,7 +343,7 @@ cardView_popupWrap.addEventListener("click", e => {
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
-    window.location.reload();
+    // window.location.reload();
     return;
   }
 });
