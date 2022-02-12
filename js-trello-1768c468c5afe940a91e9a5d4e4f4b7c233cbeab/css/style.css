@@ -1,0 +1,38 @@
+* {
+  margin: 0;padding: 0;box-sizing: border-box;
+}
+
+#root {
+  display: flex;
+  justify-content: space-around;
+  gap: 50px;
+  margin: 100px;
+}
+
+#root > div {
+  flex: 1;
+  background-color: #f0f0f0;
+  padding: 10px;
+  margin-bottom: auto;
+}
+
+.wrapper {
+  padding: 15px;
+  background-color: #fff;
+}
+
+.item {
+  padding: 15px 10px;
+  background-color: #999;
+  user-select: none;
+}
+.placeholder {
+  background-color: #ddd;
+}
+.wrapper > .item + .item {
+  margin-top: 25px;
+}
+
+.item.tg {
+  position: absolute;
+}
