@@ -232,7 +232,7 @@ const DBDeleteCard = (key) => {
     };
   }
 };
-
+ 
 const DBFetch = (name, key) => {
   key = parseInt(key);
   const pNotes = db.transaction(name).objectStore(name);
