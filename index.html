@@ -44,6 +44,7 @@
       </div>
     </div>
     
+    
     <div class="listModify__popup popup none">
       <div class="listModify__popup--write">
         <h2 class="listModify__popup--title">MODIFY LIST</h2>
@@ -62,21 +63,22 @@
     <div class="cardView__popup popup none">
       <div class="list__popup--write card__popup--write cardView__popup--write flex">
         <h2 class="list__popup--title">CARD POPUP</h2>
-        <form  name="cardView__form" class="list__input cardView__form flex">
+        <form  name="cardView__form" class="list__input cardView__form flex" onsubmit="return false">
           <div class="cardView__form--title"></div>
-          <div class="cardView__form--img img_box"><img src="" alt="" id="card__add--img" onerror="this.src='./img/noimage.png'" ></div>
-          <input id="openFile" class="btn" type="file">
+          <div class="cardView__form--img img_box"><img src="" alt="" class="cardView__img" onerror="this.src='./img/noimage.png'" ></div>
+          <input id="cardViewopenFile" class="btn" type="file">
           <div class="cardView__view--content"></div>
         </form>
         <div class="popup__btns flex">
-          <button class="cardView__add--btn btn">수정</button>
+          <button class="cardView__add--btn btn">삭제</button>
           <button class="cardView__cancel--btn btn">취소</button>
         </div>
       </div>
     </div>
     
     <div class="container flex">
-
+        
+       
       <div class="addlist flex">
         <p>+ Add another list</p>
       </div>
