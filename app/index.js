@@ -220,33 +220,6 @@ const DBDeleteCard = (key, cardCnt) => {
       
     }
   }
-<<<<<<< HEAD
-};
- 
-const DBFetch = (name, key) => {
-  key = parseInt(key);
-  const pNotes = db.transaction(name).objectStore(name);
-  const request = pNotes.get(key);
-  return request;
-};
-   
-// init
-const init = (name) => {
-  const tx = db.transaction(name,"readonly");
-  const pNotes = tx.objectStore(name);
-  const request = pNotes.openCursor();
-  request.onsuccess = e => {
-    const cursor = e.target.result;
-    if (cursor) {
-      if(name === 'trello__list'){
-        dataSetCnt = cursor.key;
-        addList(dataSetCnt, cursor.value.title);
-      }else{
-        cardCnt = cursor.key;
-        addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
-      }
-      cursor.continue();
-=======
 
   const DBFetch = (name, key) => {
     key = parseInt(key);
@@ -298,7 +271,6 @@ const init = (name) => {
             }
           });
       });
->>>>>>> 755e59c81395591aef94270131052b811b18a2f0
     }
   };
 
