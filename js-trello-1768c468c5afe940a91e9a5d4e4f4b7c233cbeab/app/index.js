@@ -11,6 +11,7 @@ placeholder.className = 'item placeholder';
 // placeholder 추가 함수
 const addPlaceholder = () => {
   Array.from(document.querySelectorAll('.wrapper')).some(wrapper => { // wrapper들 순회 (some을 사용한 이유는 마우스 포지션 내에 있는 wrapper를 만나면 거기서 loop를 종료하려고)
+    console.log(wrapper.getBoundingClientRect());
     const rect = wrapper.getBoundingClientRect();
 
     if (rect.left < currentPoint.x && currentPoint.x < rect.left + wrapper.clientWidth) { // 마우스 포지션이 wrapper 내에 있으면
