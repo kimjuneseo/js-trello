@@ -449,6 +449,7 @@ card_popupWrap.addEventListener('click', e => {
     Object.assign(clone.style, { 
       left: e.pageX - targetInfo.gap[0] + 'px',
       top: e.pageY - targetInfo.gap[1] + 'px',
+      transform: 'rotate(10deg)'
     });
   
     addPlaceholder();
