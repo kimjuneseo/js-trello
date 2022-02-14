@@ -196,6 +196,7 @@ const DBDeleteCard = (key, cardCnt) => {
   
   const DBCardModify = (key, name, value) => {
     key = parseInt(key);
+    console.log(key);
     const request = indexedDB.open('Trello', 1);
     request.onsuccess = e => {
       let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
@@ -213,6 +214,10 @@ const DBDeleteCard = (key, cardCnt) => {
         if(name === 'image'){
           card.childNodes[0].src = value;
           data.image = value;
+        }
+        if(name === 'key'){
+          // console.log(data.dataSet)
+          data.dataSet = value;
         }
         
         let requestUpdate = objectStore.put(data);
@@ -258,7 +263,7 @@ const DBDeleteCard = (key, cardCnt) => {
           }
         });
 
-        mousedown();
+ 
       });
     }
   };
@@ -338,12 +343,11 @@ card_popupWrap.addEventListener('click', e => {
         }
         cursor.continue();
       }
-      
+      if(list){
+        mousedown();
+      }
     };
   };
-
-
-  // const wrapper = document.querySelectorAll('.list');
 
   let isDown = false; 
   let clone = null; 
@@ -381,15 +385,17 @@ card_popupWrap.addEventListener('click', e => {
       }
     });
   }
+  let mouseCardDataSet;
+  let mouseListDataSet;
   const mousedown = () => {
-
     Array.from(list).map(ele => {
-      ele.addEventListener('mousedown', ({ target, pageX, pageY }) => {
+
+      ele.addEventListener('mousedown', ({currentTarget, target, pageX, pageY }) => {
         if (!(target.className === 'card')) {
           return;
         }
-        console.log(target);
-    
+        if(target.parentElement){
+        
         isDown = true; 
     
         const rect = target.getBoundingClientRect();
@@ -404,7 +410,6 @@ card_popupWrap.addEventListener('click', e => {
           width: target.clientWidth, 
           height: target.clientHeight, 
         });
-    
         placeholder.style.height = targetInfo.height + 'px'; 
     
         clone = target.cloneNode(true); 
@@ -417,13 +422,15 @@ card_popupWrap.addEventListener('click', e => {
           top: rect.top + 'px',
           zIndex: 999,
         });
-    
+        
         target.parentElement.insertBefore(placeholder, target); 
-    
+        mouseCardDataSet = target.dataset.card;
+        
         target.remove(); 
-    
         document.body.appendChild(clone); 
-      });
+      }
+    });
+
     });
   }
   
@@ -432,6 +439,7 @@ card_popupWrap.addEventListener('click', e => {
     if (!isDown) {
       return;
     }
+   
     e.preventDefault();
     Object.assign(currentPoint, { 
       x: e.pageX,
@@ -446,18 +454,17 @@ card_popupWrap.addEventListener('click', e => {
     addPlaceholder();
   }
   
-  window.onmouseup = () => {
+  window.onmouseup = (e) => {
     if (isDown) {
       
       isDown = false;
-  
+      
       clone.remove(); 
       clone.removeAttribute('style'); 
       placeholder.parentElement.insertBefore(clone, placeholder); 
-  
       clone = null; 
-  
       placeholder.remove(); 
+      DBCardModify(mouseCardDataSet, 'key', e.target.closest('.list').dataset.list);
     }
   }
 
