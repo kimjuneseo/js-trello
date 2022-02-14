@@ -9,7 +9,7 @@ body{background: var(--main__color); }
 .grid{display: grid;}
 .container{padding: .75rem;  gap: .75rem; align-items: flex-start;}
 
-.list{min-width: 300px; max-width: 300px; background: var(--list__color); border-radius: 4px; }
+.list{min-width: 300px; max-width: 300px; background: var(--list__color); border-radius: 4px; position: relative;}
 .list__menu--wrap{position: absolute; left: 285px; top: 30px; background: var(--list__color); text-align: center; line-height: 30px; z-index: 100; cursor: pointer;}
 .list__menu--wrap .modify{  border-bottom: 1px solid #000;}
 .list__menu--wrap div{width: 60px; height: 30px; transition: .5s; font-weight: 800;  color: #000; background: #ffffff54;}
@@ -51,9 +51,8 @@ body{background: var(--main__color); }
 .btn{width: 100px; height: 30px; border-radius: 5px; border: none;}
 .img_box{margin-top: 20px;  height: 140px; border-radius: 5px; overflow: hidden;}
 img{width: 100%; height: 100%; }
-.card{min-width: 272px; max-height: 300px;  transition: 1s;}
-.card:hover ,.list__footer:hover{background: rgb(196, 196, 196); transition: .5s;}
-.card, .list, .list__footer{transition: .5s;}
+.card{min-width: 272px; max-height: 300px;  }
+.card:hover ,.list__footer:hover{background: rgb(196, 196, 196); }
 .card img{height: 200px; border-radius: 5px;}
 .card__popup--write{height: 350px;}
 .card__popup--write .list__input{height: 100px; flex-direction: column; align-items: flex-start; justify-content: space-around; align-items: center;}

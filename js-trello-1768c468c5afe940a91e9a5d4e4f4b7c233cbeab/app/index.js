@@ -11,7 +11,6 @@ placeholder.className = 'item placeholder';
 // placeholder 추가 함수
 const addPlaceholder = () => {
   Array.from(document.querySelectorAll('.wrapper')).some(wrapper => { // wrapper들 순회 (some을 사용한 이유는 마우스 포지션 내에 있는 wrapper를 만나면 거기서 loop를 종료하려고)
-    console.log(wrapper.getBoundingClientRect());
     const rect = wrapper.getBoundingClientRect();
 
     if (rect.left < currentPoint.x && currentPoint.x < rect.left + wrapper.clientWidth) { // 마우스 포지션이 wrapper 내에 있으면
@@ -39,6 +38,7 @@ const addPlaceholder = () => {
 }
 
 Array.from(wrapper).map(ele => {
+  console.log(ele);
   ele.addEventListener('mousedown', ({ target, pageX, pageY }) => {
     if (!(target.className === 'item')) {
       return;
@@ -72,6 +72,7 @@ Array.from(wrapper).map(ele => {
       zIndex: 999,
     });
 
+    console.log(target);
     target.parentElement.insertBefore(placeholder, target); // 현재 아이템의 위치에 placeholder 추가함
 
     target.remove(); // 타켓 아이템 삭제
@@ -84,7 +85,6 @@ window.onmousemove = ({ pageX, pageY }) => {
   if (!isDown) {
     return;
   }
-
   Object.assign(currentPoint, { // 현재 마우스 point 위치 세팅
     x: pageX,
     y: pageY,
