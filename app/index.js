@@ -113,6 +113,7 @@ const viewCard = (list) => {
 
 const addCard = (listDataSet, cardTitle, cardImg) => {
   if(cardTitle !== ''){
+    listDataSet = parseInt(listDataSet);
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
       list.childNodes[5].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
@@ -136,18 +137,18 @@ let dataSetCnt = 0;
 const DBCreate = () => {
   const request = indexedDB.open('Trello', 1)
       request.onupgradeneeded = e => {
-          db = e.target.result;
-          const pNotes = db.createObjectStore("trello__list", {keyPath: "dataSet"});
-          const todoNotes = db.createObjectStore("trello__card",{keyPath: "cardCnt"});
-         console.log(`upgrade is called database name: ${db.name} version : ${db.version}`);
-      }
+        db = e.target.result;
+        const pNotes = db.createObjectStore("trello__list", {keyPath: "dataSet"});
+        const todoNotes = db.createObjectStore("trello__card",{keyPath: "cardCnt"});
+        console.log(`upgrade is called database name: ${db.name} version : ${db.version}`);
+        }
       request.onsuccess = e => {
-          db = e.target.result;
-          console.log(`success is called database name: ${db.name} version : ${db.version}`);
-          init("trello__list");
-          init("trello__card");
+        db = e.target.result;
+        console.log(`success is called database name: ${db.name} version : ${db.version}`);
+        render("trello__list");
+        setTimeout(() => render("trello__card"), 10)
       }
-}; 
+    }; 
 DBCreate();
 
 const DBAdd = (tableName, dataSet, title, image, content) => {
@@ -186,9 +187,8 @@ const DBDeleteCard = (key, cardCnt) => {
         if(cardCnt){
           if(cursor.key === key) cursor.delete();
         } 
-
         if(cursor.value.dataSet === key) cursor.delete();
-          cursor.continue();
+        cursor.continue();
         }
       };
     }
@@ -196,7 +196,7 @@ const DBDeleteCard = (key, cardCnt) => {
   
   const DBCardModify = (key, name, value) => {
     key = parseInt(key);
-    console.log(key);
+    console.log(name);
     const request = indexedDB.open('Trello', 1);
     request.onsuccess = e => {
       let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
@@ -204,22 +204,19 @@ const DBDeleteCard = (key, cardCnt) => {
       request.onsuccess = e => {
         let data = e.target.result;
         let card = document.querySelector(`.card[data-card='${key}'`);
+
+        if(name === 'content')data.content = value;
+        
+        if(name === 'key') data.dataSet = value
+
         if(name === 'title') {
           data.title = value;
-          card.childNodes[1].innerText = value;
+          card.childNodes[0].innerText = value;
         }
-        
-        if(name === 'content') data.content = value;
-        
         if(name === 'image'){
           card.childNodes[0].src = value;
           data.image = value;
         }
-        if(name === 'key'){
-          // console.log(data.dataSet)
-          data.dataSet = value;
-        }
-        
         let requestUpdate = objectStore.put(data);
          requestUpdate.onsuccess = () => {
            console.log('update');
@@ -268,8 +265,6 @@ const DBDeleteCard = (key, cardCnt) => {
     }
   };
 
-
-
   list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
     list_popupWrap.classList.toggle("none");
@@ -283,6 +278,7 @@ const DBDeleteCard = (key, cardCnt) => {
 
 cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 cardView_popupWrap.addEventListener("click", e => {
+
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
     input.classList.add('cardView__popup--title')
@@ -309,10 +305,17 @@ cardView_popupWrap.addEventListener("click", e => {
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
-    // window.location.reload();
+    listClear();
+    render("trello__card");
     return;
   }
 });
+
+const listClear = () => {
+  list.forEach(e => {
+    e.childNodes[5].childNodes[3].innerHTML = '';
+  })
+}
 
 openFileButton.addEventListener("change",(e) => onBase64File(e.target.files[0]));
 card_popupWrap.addEventListener('click', e => {
@@ -325,9 +328,9 @@ card_popupWrap.addEventListener('click', e => {
     return;
   }
 });
-
-  // init
-  const init = (name) => { 
+ 
+  // render
+  const render = (name) => { 
     const tx = db.transaction(name,"readonly");
     const pNotes = tx.objectStore(name);
     const request = pNotes.openCursor();
@@ -357,7 +360,6 @@ card_popupWrap.addEventListener('click', e => {
   const placeholder = document.createElement('div'); 
   placeholder.className = 'item placeholder';
   
-  
   const addPlaceholder = () => {
     Array.from(document.querySelectorAll('.cards')).some(wrapper => { 
       const rect = wrapper.getBoundingClientRect();
@@ -368,28 +370,24 @@ card_popupWrap.addEventListener('click', e => {
   
           if (currentPoint.y < rect.top + item.clientHeight / 2) { 
             placeholder.remove(); 
-  
             wrapper.insertBefore(placeholder, item); 
-  
             return true; 
           }
         });
   
         if (!isAddPlaceholder) { 
           placeholder.remove(); 
-  
           wrapper.appendChild(placeholder); 
         }
-  
         return true; 
       }
     });
   }
+
   let mouseCardDataSet;
   let mouseListDataSet;
   const mousedown = () => {
     Array.from(list).map(ele => {
-
       ele.addEventListener('mousedown', ({currentTarget, target, pageX, pageY }) => {
         if (!(target.className === 'card')) {
           return;
@@ -429,11 +427,9 @@ card_popupWrap.addEventListener('click', e => {
         target.remove(); 
         document.body.appendChild(clone); 
       }
+      });
     });
-
-    });
-  }
-  
+  };
   
   window.onmousemove = (e) => {
     if (!isDown) {
@@ -465,7 +461,9 @@ card_popupWrap.addEventListener('click', e => {
       placeholder.parentElement.insertBefore(clone, placeholder); 
       clone = null; 
       placeholder.remove(); 
-      DBCardModify(mouseCardDataSet, 'key', e.target.closest('.list').dataset.list);
+      mouseListDataSet = parseInt(e.target.closest('.list').dataset.list);
+      console.log(mouseListDataSet);
+      DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
     }
   }
 
