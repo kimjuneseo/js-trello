@@ -16,9 +16,14 @@ let cardViewImage = document.querySelector('.cardView__form--img')
 const cardViewOpenFileButton = document.querySelector("#cardViewopenFile");
 
 const createEl = (el) => document.createElement(el);
+// 카드 번호
+let cardCnt = 0;
+// 타켓된 list num
+let targetListNum;
+// list의 nodeList
+let list;
 
 // list method
-let cardCnt = 0;
 const addListListener = () => {
   let title = list_listForm.list.value;
   dataSetCnt++;
@@ -27,13 +32,11 @@ const addListListener = () => {
   list_popupWrap.classList.toggle("none");
 };
 
-let list;
 const listChk = () => {
   list = document.querySelectorAll('.list');
   listEventListener(list);
 };
 
-let targetListNum;
 const addList = (listDataSet, listTitle) => {
   if(listTitle !== ''){
     const list = createEl('div');
@@ -59,7 +62,6 @@ const addList = (listDataSet, listTitle) => {
     list_listForm.reset();
   };
   listChk();
-
 };
   
 const listClear = () => list.forEach(e => e.childNodes[5].childNodes[3].innerHTML = '');
@@ -97,9 +99,9 @@ const elementChange = (target, keyName) => {
   return input;
 };
 
-const viewCard = (list) => {
+const viewCard = (viewList) => {
   cardView_popupWrap.classList.remove("none");
-  let data = DBFetch('trello__card', list);
+  let data = DBFetch('trello__card', viewList);
   data.onsuccess = e => {
     cardView_listModifyForm.childNodes.forEach(e => {
       if(e.classList){
@@ -141,7 +143,7 @@ const DBCreate = () => {
         const pNotes = db.createObjectStore("trello__list", {keyPath: "dataSet"});
         const todoNotes = db.createObjectStore("trello__card",{keyPath: "cardCnt"});
         console.log(`upgrade is called database name: ${db.name} version : ${db.version}`);
-        }
+      }
       request.onsuccess = e => {
         db = e.target.result;
         console.log(`success is called database name: ${db.name} version : ${db.version}`);
@@ -149,7 +151,6 @@ const DBCreate = () => {
         setTimeout(() => render("trello__card"), 10);
       }
     }; 
-DBCreate();
 
 const DBAdd = (tableName, dataSet, title, image, content) => {
   const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image, content} 
@@ -172,7 +173,7 @@ const DBDeleteList = (key) => {
   }
 };
 
-const DBDeleteCard = (key, cardCnt) => {
+const DBDeleteCard = (key) => {
   key = parseInt(key);
   const request = indexedDB.open('Trello', 1)
   request.onsuccess = e => {
@@ -187,84 +188,84 @@ const DBDeleteCard = (key, cardCnt) => {
           if(cursor.key === key) cursor.delete();
         } 
         if(cursor.value.dataSet === key) cursor.delete();
+
         cursor.continue();
         }
       };
     }
   };
   
-  const DBCardModify = (key, name, value) => {
-    key = parseInt(key);
-    console.log(name);
-    const request = indexedDB.open('Trello', 1);
+const DBCardModify = (key, name, value) => {
+  key = parseInt(key);
+  console.log(name);
+  const request = indexedDB.open('Trello', 1);
+  request.onsuccess = e => {
+    let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
+    let request = objectStore.get(key);
     request.onsuccess = e => {
-      let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
-      let request = objectStore.get(key);
-      request.onsuccess = e => {
-        let data = e.target.result;
-        let card = document.querySelector(`.card[data-card='${key}'`);
-
-        if(name === 'content')data.content = value;
-        
-        if(name === 'key') data.dataSet = value;
-
-        if(name === 'title') {
-          data.title = value;
-          card.childNodes[0].innerText = value;
-        }
-        if(name === 'image'){
-          card.childNodes[0].src = value;
-          data.image = value;
-        }
-        let requestUpdate = objectStore.put(data);
-         requestUpdate.onsuccess = () => {
-           console.log('update');
-         };
-      };
+      let data = e.target.result;
+      let card = document.querySelector(`.card[data-card='${key}'`);
       
-    }
-  };
+      if(name === 'content')data.content = value;
+      
+      if(name === 'key') data.dataSet = value;
 
-  const DBFetch = (name, key) => {
-    key = parseInt(key);
-    const pNotes = db.transaction(name).objectStore(name);
-    const request = pNotes.get(key);
-    return request;
-  };
+      if(name === 'title') {
+        data.title = value;
+        card.childNodes[0].innerText = value;
+      }
+      if(name === 'image'){
+        card.childNodes[0].src = value;
+        data.image = value;
+      }
+      let requestUpdate = objectStore.put(data);
+       requestUpdate.onsuccess = () => {
+         console.log('update');
+       };
+    };
+    
+  }
+};
 
-  const listEventListener = (list)=> {
-    if(list){
-      list.forEach(el => {
-        el.addEventListener("click", (e) => {
-          let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-          if(list){
-            // list remove
-            if(e.target.classList.contains("remove")){
-              DBDeleteList(list.dataset.list);
-              list.remove();
-              return;
-            }
-            // cardView
-            if(e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) {
-              viewCard(e.target.dataset.card);
-              cardDataSet = e.target.dataset.card;
-              return;
-            }
-            //card add
-            if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
-              card_popupWrap.classList.remove("none");
-              targetListNum = e.currentTarget.dataset.list;
-              return;
-            }
+const DBFetch = (name, key) => {
+  key = parseInt(key);
+  const pNotes = db.transaction(name).objectStore(name);
+  const request = pNotes.get(key);
+  return request;
+};
+
+const listEventListener = (list)=> {
+  if(list){
+    list.forEach(el => {
+      el.addEventListener("click", (e) => {
+        let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
+        if(list){
+          // list remove
+          if(e.target.classList.contains("remove")){
+            DBDeleteList(list.dataset.list);
+            list.remove();
+            return;
           }
-        });
-
- 
+          // cardView
+          if(e.target.classList.contains("card") || e.target.classList.contains("card__img") || e.target.classList.contains("cardTitle")) {
+            viewCard(e.target.dataset.card);
+            cardDataSet = e.target.dataset.card;
+            return;
+          }
+          //card add
+          if(e.target.classList.contains("list__footer") || e.target.classList.contains("list__footer--txt") ){
+            card_popupWrap.classList.remove("none");
+            targetListNum = e.currentTarget.dataset.list;
+            return;
+          }
+        }
       });
-    }
-  };
 
-  list_popupWrap.addEventListener("click", e => {
+    });
+  }
+};
+
+list_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('list__cancel--btn')){
     list_popupWrap.classList.toggle("none");
     return;
@@ -322,142 +323,143 @@ card_popupWrap.addEventListener('click', e => {
     return;
   }
 });
- 
-  // render
-  const render = (name) => { 
-    const tx = db.transaction(name,"readonly");
-    const pNotes = tx.objectStore(name);
-    const request = pNotes.openCursor();
-    request.onsuccess = e => {
-      const cursor = e.target.result;
-      if (cursor) {
-        if(name === 'trello__list'){
-          dataSetCnt = cursor.key;
-          addList(dataSetCnt, cursor.value.title);
-        }else{
-          cardCnt = cursor.key;
-          addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
-        }
-        cursor.continue();
-      }
-      if(list){
-        mousedown();
-      }
-    };
-  };
 
-  let isDown = false; 
-  let clone = null; 
-  const targetInfo = {}; 
-  const currentPoint = {}; 
-  
-  const placeholder = document.createElement('div'); 
-  placeholder.className = 'item placeholder';
-  
-  const addPlaceholder = () => {
-    Array.from(document.querySelectorAll('.cards')).some(wrapper => { 
-      const rect = wrapper.getBoundingClientRect();
-  
-      if (rect.left < currentPoint.x && currentPoint.x < rect.left + wrapper.clientWidth) { 
-        const isAddPlaceholder = Array.from(wrapper.children).filter(({ className }) => className === 'card').some((item) => { 
-          const rect = item.getBoundingClientRect();
-  
-          if (currentPoint.y < rect.top + item.clientHeight / 2) { 
-            placeholder.remove(); 
-            wrapper.insertBefore(placeholder, item); 
-            return true; 
-          }
-        });
-  
-        if (!isAddPlaceholder) { 
+let isDown = false; 
+let clone = null; 
+const targetInfo = {}; 
+const currentPoint = {}; 
+
+const placeholder = document.createElement('div'); 
+placeholder.className = 'item placeholder';
+
+let mouseCardDataSet;
+let mouseListDataSet;
+
+const addPlaceholder = () => {
+  Array.from(document.querySelectorAll('.cards')).some(wrapper => { 
+    const rect = wrapper.getBoundingClientRect();
+
+    if (rect.left < currentPoint.x && currentPoint.x < rect.left + wrapper.clientWidth) { 
+      const isAddPlaceholder = Array.from(wrapper.children).filter(({ className }) => className === 'card').some((item) => { 
+        const rect = item.getBoundingClientRect();
+
+        if (currentPoint.y < rect.top + item.clientHeight / 2) { 
           placeholder.remove(); 
-          wrapper.appendChild(placeholder); 
+          wrapper.insertBefore(placeholder, item); 
+          return true; 
         }
-        return true; 
-      }
-    });
-  };
-
-  let mouseCardDataSet;
-  let mouseListDataSet;
-  const mousedown = () => {
-    Array.from(list).map(ele => {
-      ele.addEventListener('mousedown', ({currentTarget, target, pageX, pageY }) => {
-        if (!(target.className === 'card')) {
-          return;
-        }
-        if(target.parentElement){
-        
-        isDown = true; 
-    
-        const rect = target.getBoundingClientRect();
-    
-        Object.assign(currentPoint, { 
-          x: pageX,
-          y: pageY,
-        });
-    
-        Object.assign(targetInfo, {
-          gap: [pageX - rect.left, pageY - rect.top], 
-          width: target.clientWidth, 
-          height: target.clientHeight, 
-        });
-        placeholder.style.height = targetInfo.height + 'px'; 
-    
-        clone = target.cloneNode(true); 
-    
-        Object.assign(clone.style, { 
-          position: 'fixed',
-          width: target.clientWidth + 'px',
-          height: target.clientHeight + 'px',
-          left: rect.left + 'px',
-          top: rect.top + 'px',
-          zIndex: 999,
-        });
-        
-        target.parentElement.insertBefore(placeholder, target); 
-        mouseCardDataSet = target.dataset.card;
-        
-        target.remove(); 
-        document.body.appendChild(clone); 
-      }
       });
-    });
-  };
-  
-  window.onmousemove = (e) => {
-    if (!isDown) {
-      return;
-    }
-   
-    e.preventDefault();
-    Object.assign(currentPoint, { 
-      x: e.pageX,
-      y: e.pageY,
-    });
-  
-    Object.assign(clone.style, { 
-      left: e.pageX - targetInfo.gap[0] + 'px',
-      top: e.pageY - targetInfo.gap[1] + 'px',
-      transform: 'rotate(10deg)'
-    });
-  
-    addPlaceholder();
-  };
-  
-  window.onmouseup = (e) => {
-    if (isDown) {
-      
-      isDown = false;
-      
-      clone.remove(); 
-      clone.removeAttribute('style'); 
-      placeholder.parentElement.insertBefore(clone, placeholder); 
-      clone = null; 
-      placeholder.remove(); 
-      mouseListDataSet = parseInt(e.target.closest('.list').dataset.list);
-      console.log(mouseListDataSet);
-      DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
-    }
-  };
 
+      if (!isAddPlaceholder) { 
+        placeholder.remove(); 
+        wrapper.appendChild(placeholder); 
+      }
+      return true; 
+    }
+  });
+};
+
+const mousedown = () => {
+  Array.from(list).map(ele => {
+    ele.addEventListener('mousedown', ({currentTarget, target, pageX, pageY }) => {
+      if (!(target.className === 'card')) {
+        return;
+      }
+      if(target.parentElement){
+      
+      isDown = true; 
+  
+      const rect = target.getBoundingClientRect();
+  
+      Object.assign(currentPoint, { 
+        x: pageX,
+        y: pageY,
+      });
+  
+      Object.assign(targetInfo, {
+        gap: [pageX - rect.left, pageY - rect.top], 
+        width: target.clientWidth, 
+        height: target.clientHeight, 
+      });
+      placeholder.style.height = targetInfo.height + 'px'; 
+  
+      clone = target.cloneNode(true); 
+  
+      Object.assign(clone.style, { 
+        position: 'fixed',
+        width: target.clientWidth + 'px',
+        height: target.clientHeight + 'px',
+        left: rect.left + 'px',
+        top: rect.top + 'px',
+        zIndex: 999,
+      });
+      
+      target.parentElement.insertBefore(placeholder, target); 
+      mouseCardDataSet = target.dataset.card;
+      
+      target.remove(); 
+      document.body.appendChild(clone); 
+    }
+    });
+  });
+};
+
+window.onmousemove = (e) => {
+  if (!isDown) {
+    return;
+  }
+ 
+  e.preventDefault();
+  Object.assign(currentPoint, { 
+    x: e.pageX,
+    y: e.pageY,
+  });
+
+  Object.assign(clone.style, { 
+    left: e.pageX - targetInfo.gap[0] + 'px',
+    top: e.pageY - targetInfo.gap[1] + 'px',
+    transform: 'rotate(10deg)'
+  });
+
+  addPlaceholder();
+};
+
+window.onmouseup = (e) => {
+  if (isDown) {
+    isDown = false;
+    clone.remove(); 
+    clone.removeAttribute('style'); 
+    placeholder.parentElement.insertBefore(clone, placeholder); 
+    clone = null; 
+    placeholder.remove(); 
+    mouseListDataSet = parseInt(e.target.closest('.list').dataset.list);
+    DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
+  }
+};
+
+// render
+const render = (name) => { 
+  const tx = db.transaction(name,"readonly");
+  const pNotes = tx.objectStore(name);
+  const request = pNotes.openCursor();
+  request.onsuccess = e => {
+    const cursor = e.target.result;
+    if (cursor) {
+      if(name === 'trello__list'){
+        dataSetCnt = cursor.key;
+        addList(dataSetCnt, cursor.value.title);
+      }else{
+        cardCnt = cursor.key;
+        addCard(cursor.value.dataSet, cursor.value.title, cursor.value.image, cardCnt);
+      }
+      cursor.continue();
+    }
+    if(list){
+      mousedown();
+    }
+  };
+};
+
+const init = (() => {
+  DBCreate();
+})(); 
