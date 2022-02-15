@@ -29,10 +29,8 @@ const addListListener = () => {
 
 let list;
 const listChk = () => {
-  list = document.querySelectorAll('.list')
+  list = document.querySelectorAll('.list');
   listEventListener(list);
-  list = document.querySelectorAll('.list')
-
 };
 
 let targetListNum;
@@ -64,6 +62,8 @@ const addList = (listDataSet, listTitle) => {
 
 };
   
+const listClear = () => list.forEach(e => e.childNodes[5].childNodes[3].innerHTML = '');
+
 //card method
 let cardDataSet;
 const onBase64File = (file, db) =>{
@@ -146,7 +146,7 @@ const DBCreate = () => {
         db = e.target.result;
         console.log(`success is called database name: ${db.name} version : ${db.version}`);
         render("trello__list");
-        setTimeout(() => render("trello__card"), 10)
+        setTimeout(() => render("trello__card"), 10);
       }
     }; 
 DBCreate();
@@ -165,7 +165,6 @@ const DBDeleteList = (key) => {
   request.onsuccess = e => {
     let db = e.target.result;
     let transaction = db.transaction("trello__list", "readwrite");
-    
     let objectStore = transaction.objectStore("trello__list");
     let deleteRequest = objectStore.delete(key);
     deleteRequest.onsuccess = e => console.log("delete");
@@ -207,7 +206,7 @@ const DBDeleteCard = (key, cardCnt) => {
 
         if(name === 'content')data.content = value;
         
-        if(name === 'key') data.dataSet = value
+        if(name === 'key') data.dataSet = value;
 
         if(name === 'title') {
           data.title = value;
@@ -224,7 +223,7 @@ const DBDeleteCard = (key, cardCnt) => {
       };
       
     }
-  }
+  };
 
   const DBFetch = (name, key) => {
     key = parseInt(key);
@@ -281,7 +280,7 @@ cardView_popupWrap.addEventListener("click", e => {
 
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
-    input.classList.add('cardView__popup--title')
+    input.classList.add('cardView__popup--title');
     cardViewImage.before(input);
     input.focus();
     return;
@@ -289,7 +288,7 @@ cardView_popupWrap.addEventListener("click", e => {
   
   if(e.target.classList.contains('cardView__view--content')){
     let input = elementChange(e.target, 'content');
-    input.classList.add('cardView__popup-content')
+    input.classList.add('cardView__popup-content');
     cardView_listModifyForm.appendChild(input);
     input.focus();
     return;
@@ -311,13 +310,8 @@ cardView_popupWrap.addEventListener("click", e => {
   }
 });
 
-const listClear = () => {
-  list.forEach(e => {
-    e.childNodes[5].childNodes[3].innerHTML = '';
-  })
-}
-
 openFileButton.addEventListener("change",(e) => onBase64File(e.target.files[0]));
+
 card_popupWrap.addEventListener('click', e => {
   if(e.target.classList.contains('card__cancel--btn')){
     card_popupWrap.classList.toggle("none");
@@ -382,7 +376,7 @@ card_popupWrap.addEventListener('click', e => {
         return true; 
       }
     });
-  }
+  };
 
   let mouseCardDataSet;
   let mouseListDataSet;
@@ -449,7 +443,7 @@ card_popupWrap.addEventListener('click', e => {
     });
   
     addPlaceholder();
-  }
+  };
   
   window.onmouseup = (e) => {
     if (isDown) {
@@ -465,5 +459,5 @@ card_popupWrap.addEventListener('click', e => {
       console.log(mouseListDataSet);
       DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
     }
-  }
+  };
 
