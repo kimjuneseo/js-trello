@@ -330,7 +330,7 @@ const targetInfo = {};
 const currentPoint = {}; 
 
 const placeholder = document.createElement('div'); 
-placeholder.className = 'item placeholder';
+placeholder.className = 'card placeholder';
 
 let mouseCardDataSet;
 let mouseListDataSet;
@@ -367,38 +367,38 @@ const mousedown = () => {
       }
       if(target.parentElement){
       
-      isDown = true; 
-  
-      const rect = target.getBoundingClientRect();
-  
-      Object.assign(currentPoint, { 
-        x: pageX,
-        y: pageY,
-      });
-  
-      Object.assign(targetInfo, {
-        gap: [pageX - rect.left, pageY - rect.top], 
-        width: target.clientWidth, 
-        height: target.clientHeight, 
-      });
-      placeholder.style.height = targetInfo.height + 'px'; 
-  
-      clone = target.cloneNode(true); 
-  
-      Object.assign(clone.style, { 
-        position: 'fixed',
-        width: target.clientWidth + 'px',
-        height: target.clientHeight + 'px',
-        left: rect.left + 'px',
-        top: rect.top + 'px',
-        zIndex: 999,
-      });
-      
-      target.parentElement.insertBefore(placeholder, target); 
-      mouseCardDataSet = target.dataset.card;
-      
-      target.remove(); 
-      document.body.appendChild(clone); 
+        isDown = true; 
+    
+        const rect = target.getBoundingClientRect();
+    
+        Object.assign(currentPoint, { 
+          x: pageX,
+          y: pageY,
+        });
+    
+        Object.assign(targetInfo, {
+          gap: [pageX - rect.left, pageY - rect.top], 
+          width: target.clientWidth, 
+          height: target.clientHeight, 
+        });
+        placeholder.style.height = targetInfo.height + 'px'; 
+    
+        clone = target.cloneNode(true); 
+    
+        Object.assign(clone.style, { 
+          position: 'fixed',
+          width: target.clientWidth + 'px',
+          height: target.clientHeight + 'px',
+          left: rect.left + 'px',
+          top: rect.top + 'px',
+          zIndex: 999,
+        });
+        
+        target.parentElement.insertBefore(placeholder, target); 
+        mouseCardDataSet = target.dataset.card;
+        
+        target.remove(); 
+        document.body.appendChild(clone); 
     }
     });
   });
@@ -427,14 +427,14 @@ window.onmousemove = (e) => {
 window.onmouseup = (e) => {
   if (isDown) {
     isDown = false;
+  }
     clone.remove(); 
     clone.removeAttribute('style'); 
     placeholder.parentElement.insertBefore(clone, placeholder); 
     clone = null; 
-    placeholder.remove(); 
-    mouseListDataSet = parseInt(e.target.closest('.list').dataset.list);
+    mouseListDataSet = parseInt(e.target.closest('.list').dataset.list) ?  parseInt(e.target.closest('.list').dataset.list) : mouseListDataSet
     DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
-  }
+    placeholder.remove(); 
 };
 
 // render
