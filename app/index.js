@@ -197,7 +197,6 @@ const DBDeleteCard = (key) => {
   
 const DBCardModify = (key, name, value) => {
   key = parseInt(key);
-  console.log(name);
   const request = indexedDB.open('Trello', 1);
   request.onsuccess = e => {
     let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
@@ -330,7 +329,6 @@ const targetInfo = {};
 const currentPoint = {}; 
 
 const placeholder = document.createElement('div'); 
-placeholder.className = 'card placeholder';
 
 let mouseCardDataSet;
 let mouseListDataSet;
@@ -427,7 +425,6 @@ window.onmousemove = (e) => {
 window.onmouseup = (e) => {
   if (isDown) {
     isDown = false;
-  }
     clone.remove(); 
     clone.removeAttribute('style'); 
     placeholder.parentElement.insertBefore(clone, placeholder); 
@@ -435,6 +432,7 @@ window.onmouseup = (e) => {
     mouseListDataSet = parseInt(e.target.closest('.list').dataset.list) ?  parseInt(e.target.closest('.list').dataset.list) : mouseListDataSet
     DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
     placeholder.remove(); 
+  }
 };
 
 // render
