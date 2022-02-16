@@ -99,9 +99,9 @@ const elementChange = (target, keyName) => {
   return input;
 };
 
-const viewCard = (viewList) => {
+const viewCard = (viewCard) => {
   cardView_popupWrap.classList.remove("none");
-  let data = DBFetch('trello__card', viewList);
+  let data = DBFetch('trello__card', viewCard);
   data.onsuccess = e => {
     cardView_listModifyForm.childNodes.forEach(e => {
       if(e.classList){
@@ -118,7 +118,7 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
     listDataSet = parseInt(listDataSet);
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      list.childNodes[5].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5500/img/noimage.png' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
+      list.childNodes[5].childNodes[3].innerHTML += cardImg === 'http://127.0.0.1:5501/img/noimage.png' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -357,17 +357,20 @@ const addPlaceholder = () => {
   });
 };
 
+let mouseDownList;
 const mousedown = () => {
   Array.from(list).map(ele => {
-    ele.addEventListener('mousedown', ({currentTarget, target, pageX, pageY }) => {
-      if (!(target.className === 'card')) {
+    ele.addEventListener('mousedown', ({pageX, pageY, target}) => {
+      if (!(target.classList.contains('card') || target.classList.contains('cardTitle') || target.classList.contains('card__img'))) {
         return;
       }
-      if(target.parentElement){
+      let mouseDownCard = document.querySelector(`.card[data-card="${target.dataset.card}"]`);
+      if(mouseDownCard.closest('.list')){
+        mouseDownList = target.closest('.list').dataset.list;
       
         isDown = true; 
     
-        const rect = target.getBoundingClientRect();
+        const rect = mouseDownCard.getBoundingClientRect();
     
         Object.assign(currentPoint, { 
           x: pageX,
@@ -376,26 +379,26 @@ const mousedown = () => {
     
         Object.assign(targetInfo, {
           gap: [pageX - rect.left, pageY - rect.top], 
-          width: target.clientWidth, 
-          height: target.clientHeight, 
+          width: mouseDownCard.clientWidth, 
+          height: mouseDownCard.clientHeight, 
         });
         placeholder.style.height = targetInfo.height + 'px'; 
     
-        clone = target.cloneNode(true); 
+        clone = mouseDownCard.cloneNode(true); 
     
         Object.assign(clone.style, { 
           position: 'fixed',
-          width: target.clientWidth + 'px',
-          height: target.clientHeight + 'px',
+          width: mouseDownCard.clientWidth + 'px',
+          height: mouseDownCard.clientHeight + 'px',
           left: rect.left + 'px',
           top: rect.top + 'px',
           zIndex: 999,
         });
         
-        target.parentElement.insertBefore(placeholder, target); 
-        mouseCardDataSet = target.dataset.card;
+        mouseDownCard.parentElement.insertBefore(placeholder, mouseDownCard); 
+        mouseCardDataSet = mouseDownCard.dataset.card;
         
-        target.remove(); 
+        mouseDownCard.remove(); 
         document.body.appendChild(clone); 
     }
     });
@@ -406,7 +409,7 @@ window.onmousemove = (e) => {
   if (!isDown) {
     return;
   }
- 
+  
   e.preventDefault();
   Object.assign(currentPoint, { 
     x: e.pageX,
@@ -429,13 +432,16 @@ window.onmouseup = (e) => {
     clone.removeAttribute('style'); 
     placeholder.parentElement.insertBefore(clone, placeholder); 
     clone = null; 
-    mouseListDataSet = parseInt(e.target.closest('.list').dataset.list) ?  parseInt(e.target.closest('.list').dataset.list) : mouseListDataSet
-    DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
+    mouseListDataSet = parseInt(e.target.closest('.list').dataset.list);
     placeholder.remove(); 
+    if(mouseDownList == mouseListDataSet){
+      viewCard(mouseCardDataSet);
+      return;
+    }
+    DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
   }
 };
 
-// render
 const render = (name) => { 
   const tx = db.transaction(name,"readonly");
   const pNotes = tx.objectStore(name);
