@@ -60,7 +60,7 @@ const addList = (listDataSet, listTitle) => {
     </div> `;
     addlistBtn.before(list);
     list_listForm.reset();
-  };
+  }
   listChk();
 };
   
@@ -94,6 +94,7 @@ const elementChange = (target, keyName) => {
     }
   });
   input.addEventListener("blur", e => {
+    console.log(cardDataSet)
     DBCardModify(cardDataSet, keyName, input.value);
   });
   return input;
@@ -122,6 +123,7 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
+      console.log(cardCnt)
     }
   }
 };
@@ -237,7 +239,9 @@ const listEventListener = (list)=> {
   if(list){
     list.forEach(el => {
       el.addEventListener("click", (e) => {
+        console.log(e.target)
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
+        
         if(list){
           // list remove
           if(e.target.classList.contains("remove")){
@@ -405,11 +409,15 @@ const mousedown = () => {
   });
 };
 
+
+// 하다 말음 클릭했을때 viewcard되는거 하다가 말음
+let moveMouseChk = true;
 window.onmousemove = (e) => {
   if (!isDown) {
     return;
   }
   
+  moveMouseChk = false;
   e.preventDefault();
   Object.assign(currentPoint, { 
     x: e.pageX,
@@ -434,8 +442,9 @@ window.onmouseup = (e) => {
     clone = null; 
     mouseListDataSet = parseInt(e.target.closest('.list').dataset.list);
     placeholder.remove(); 
-    if(mouseDownList == mouseListDataSet){
+    if(moveMouseChk){
       viewCard(mouseCardDataSet);
+      moveMouseChk = true;
       return;
     }
     DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
