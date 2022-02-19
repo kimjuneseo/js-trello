@@ -411,6 +411,7 @@ const mousedown = () => {
 
 
 // 하다 말음 클릭했을때 viewcard되는거 하다가 말음
+// 모르겠당
 let moveMouseChk = true;
 window.onmousemove = (e) => {
   if (!isDown) {
