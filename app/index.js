@@ -75,7 +75,7 @@ const onBase64File = (file, db) =>{
     let result = reader.result;
     img.src = result;
     if(db){
-      DBCardModify(cardDataSet, 'image', result);
+      DBCardModify(cardView_popupWrap.dataset.card, 'image', result);
     }
     return result;
   };
@@ -89,13 +89,12 @@ const elementChange = (target, keyName) => {
   input.setAttribute('value', target.innerText);
   input.addEventListener("keydown", e => {
     if(window.event.keyCode === 13){
-      DBCardModify(cardDataSet, keyName, input.value);
+      DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value);
       input.blur();
     }
   });
   input.addEventListener("blur", e => {
-    console.log(cardDataSet)
-    DBCardModify(cardDataSet, keyName, input.value);
+    DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value);
   });
   return input;
 };
@@ -104,6 +103,7 @@ const viewCard = (viewCard) => {
   cardView_popupWrap.classList.remove("none");
   let data = DBFetch('trello__card', viewCard);
   data.onsuccess = e => {
+    cardView_popupWrap.dataset.card = viewCard;
     cardView_listModifyForm.childNodes.forEach(e => {
       if(e.classList){
         if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
@@ -123,7 +123,6 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
-      console.log(cardCnt)
     }
   }
 };
@@ -281,6 +280,8 @@ list_popupWrap.addEventListener("click", e => {
 
 cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 cardView_popupWrap.addEventListener("click", e => {
+  // 새로 만들때 마다 cardcnt 올라가서 그거 고쳐야함 하다가말았언
+  let card = document.querySelector(`.card[data-card='${cardView_popupWrap.dataset.card}'`);
 
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
@@ -301,17 +302,16 @@ cardView_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('cardView__add--btn')){
     cardView_popupWrap.classList.toggle('none');
     DBDeleteCard(cardDataSet, true);
-    let card = document.querySelector(`.card[data-card='${cardDataSet}'`);
-    card.remove();
     return;
   }
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
     listClear();
-    render("trello__card");
     return;
   }
+  card.remove();
+  render("trello__card");
 });
 
 openFileButton.addEventListener("change",(e) => onBase64File(e.target.files[0]));
@@ -366,6 +366,7 @@ let moveMouseChk = true;
 const mousedown = () => {
   Array.from(list).map(ele => {
     ele.addEventListener('mousedown', ({pageX, pageY, target}) => {
+      // listEventListener();
       if (!(target.classList.contains('card') || target.classList.contains('cardTitle') || target.classList.contains('card__img'))) {
         return;
       }
