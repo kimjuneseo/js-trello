@@ -280,7 +280,6 @@ list_popupWrap.addEventListener("click", e => {
 
 cardView_popupWrap.addEventListener("click", e => {
   // 새로 만들때 마다 cardcnt 올라가서 그거 고쳐야함 하다가말았언
-  let card = document.querySelector(`.card[data-card='${cardView_popupWrap.dataset.card}'`);
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
     input.classList.add('cardView__popup--title');
@@ -307,6 +306,12 @@ cardView_popupWrap.addEventListener("click", e => {
     cardView_popupWrap.classList.toggle('none');
     listClear();
     render('trello__card')
+    return;
+  }
+  
+  if(e.target.classList.contains('card_btn2')){
+    let card = document.querySelector(`.card[data-card='${cardView_popupWrap.dataset.card}'`);
+    console.log(card.childNodes[0].remove());
     return;
   }
 });
