@@ -115,14 +115,14 @@ const viewCard = (viewCard) => {
   }
 };
 
-// 이미지가 없을때 추가해주기
 
 const addCard = (listDataSet, cardTitle, cardImg) => {
   if(cardTitle !== ''){
     listDataSet = parseInt(listDataSet);
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      list.childNodes[5].childNodes[3].innerHTML += cardImg.includes('noimage.png') ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
+      // console.log(cardImg);
+      list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -133,7 +133,8 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
 const addCardListener = () => {
   card_popupWrap.classList.toggle("none");
   let card_title = card_cardForm.card.value;
-  DBAdd('trello__card', targetListNum, card_title, image.src , '');
+  console.log(image.src.includes('noimage'));
+  DBAdd('trello__card', targetListNum, card_title, image.src.includes('noimage') ? '' : image.src   , '');
   addCard(targetListNum, card_title, image.src);
 };
 
@@ -241,7 +242,6 @@ const listEventListener = (list)=> {
   if(list){
     list.forEach(el => {
       el.addEventListener("click", (e) => {
-        console.log(e.target)
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
         
         if(list){
