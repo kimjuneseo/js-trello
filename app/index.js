@@ -71,12 +71,13 @@ let cardDataSet;
 const onBase64File = (file, db) =>{
   let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
   let reader = new FileReader();
-  reader.onload = function () {
+  reader.onload = function(){
     let result = reader.result;
     img.src = result;
     if(db){
       DBCardModify(cardView_popupWrap.dataset.card, 'image', result);
     }
+
     return result;
   };
   reader.readAsDataURL(file); 
@@ -109,7 +110,7 @@ const viewCard = (viewCard) => {
         if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
         if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
         if(e.classList.contains('cardView__view--content')) e.innerText = data.result.content ==='' ? '설명을 입력해주세요..' :  data.result.content;
-        if(e.classList.contains('btns')) e.innerHTML = data.result.image.includes('noimage.png') ? ` <label  class="card_btn card_btn1" for="cardViewopenFile">이미지 추가</label>` :  `<label  class="card_btn card_btn1" for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
+        if(e.classList.contains('btns')) e.innerHTML = data.result.image === '' ? ` <label  class="card_btn card_btn1 add__img" for="cardViewImage">이미지 추가</label>` :  `<label  class="card_btn card_btn1" for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
       }
     });
   }
@@ -121,7 +122,6 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
     listDataSet = parseInt(listDataSet);
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      // console.log(cardImg);
       list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
@@ -133,9 +133,8 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
 const addCardListener = () => {
   card_popupWrap.classList.toggle("none");
   let card_title = card_cardForm.card.value;
-  console.log(image.src.includes('noimage'));
-  DBAdd('trello__card', targetListNum, card_title, image.src.includes('noimage') ? '' : image.src   , '');
-  addCard(targetListNum, card_title, image.src);
+  DBAdd('trello__card', targetListNum, card_title, image.src.includes('noimage') ? '' : image.src    , '');
+  addCard(targetListNum, card_title, image.src.includes('noimage') ? '' : image.src);
 };
 
 // DB METHOD
@@ -155,7 +154,7 @@ const DBCreate = () => {
         render("trello__list");
         setTimeout(() => render("trello__card"), 10);
       }
-    }; 
+}; 
 
 const DBAdd = (tableName, dataSet, title, image, content) => {
   const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image, content} 
@@ -282,7 +281,6 @@ list_popupWrap.addEventListener("click", e => {
 });
 
 cardView_popupWrap.addEventListener("click", e => {
-  // 새로 만들때 마다 cardcnt 올라가서 그거 고쳐야함 하다가말았언
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
     input.classList.add('cardView__popup--title');
@@ -312,12 +310,12 @@ cardView_popupWrap.addEventListener("click", e => {
     return;
   }
   
-  if(e.target.classList.contains('card_btn2')){
-    let card = document.querySelector(`.card[data-card='${cardView_popupWrap.dataset.card}'`);
-    console.log(card.childNodes[0].remove());
-    return;
-  }
 });
+
+let cardViewAddImg = document.querySelector('#cardViewImage');
+
+cardViewAddImg.addEventListener("change", e => onBase64File(e.target.files[0], 'addImg'));
+
 cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 
 openFileButton.addEventListener("change",(e) => onBase64File(e.target.files[0]));

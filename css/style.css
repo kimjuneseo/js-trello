@@ -73,7 +73,7 @@ img{width: 100%; height: 100%; }
 .list__input_chk{display: none;}
 .list .list__input_chk:checked~.list__menu--wrap{ display: block;}
 
-#cardViewopenFile{display: none;}
+input[type="file"]{display: none;}
 .card_btn{border: none; font-size: 1rem; padding: 4px; color: #fff;}
 .card_btn1{background: #0279bf;}
 .card_btn2{background: red;}
