@@ -109,10 +109,13 @@ const viewCard = (viewCard) => {
         if(e.classList.contains('cardView__form--title'))  e.innerText = data.result.title;
         if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
         if(e.classList.contains('cardView__view--content')) e.innerText = data.result.content ==='' ? '설명을 입력해주세요..' :  data.result.content;
+        if(e.classList.contains('btns')) e.innerHTML = data.result.image.includes('noimage.png') ? ` <label  class="card_btn card_btn1" for="cardViewopenFile">이미지 추가</label>` :  `<label  class="card_btn card_btn1" for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
       }
     });
   }
 };
+
+// 이미지가 없을때 추가해주기
 
 const addCard = (listDataSet, cardTitle, cardImg) => {
   if(cardTitle !== ''){
