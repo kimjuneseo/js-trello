@@ -222,6 +222,10 @@ const DBCardModify = (key, name, value) => {
         card.innerText = value;
       }
       if(name === 'image'){
+        console.log()
+        
+        // card.children
+        // card.childNodes[1]
         card.src = value;
         data.image = value;
       }
