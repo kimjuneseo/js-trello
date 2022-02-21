@@ -70,11 +70,13 @@ const listClear = () => list.forEach(e => e.childNodes[5].childNodes[3].innerHTM
 let cardDataSet;
 const onBase64File = (file, db) =>{
   let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
+  console.log(img);
   let reader = new FileReader();
   reader.onload = function(){
     let result = reader.result;
     img.src = result;
     if(db){
+      // DBCardModify 수정중 
       DBCardModify(cardView_popupWrap.dataset.card, 'image', result);
     }
 
@@ -199,6 +201,7 @@ const DBDeleteCard = (key) => {
     }
   };
   
+
 const DBCardModify = (key, name, value) => {
   key = parseInt(key);
   const request = indexedDB.open('Trello', 1);
@@ -207,7 +210,8 @@ const DBCardModify = (key, name, value) => {
     let request = objectStore.get(key);
     request.onsuccess = e => {
       let data = e.target.result;
-      let card = name === 'title'? document.querySelector(`.cardTitle[data-card='${key}'`) : document.querySelector(`.card[data-card='${key}'`).childNodes[0];
+      let card = name === 'title'? document.querySelector(`.cardTitle[data-card='${key}'`) : document.querySelector(`.card[data-card='${key}'`);
+      console.log(card);
 
       if(name === 'content')data.content = value;
       
@@ -314,7 +318,7 @@ cardView_popupWrap.addEventListener("click", e => {
 
 let cardViewAddImg = document.querySelector('#cardViewImage');
 
-cardViewAddImg.addEventListener("change", e => onBase64File(e.target.files[0], 'addImg'));
+cardViewAddImg.addEventListener("change", e => onBase64File(e.target.files[0], true));
 
 cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 
