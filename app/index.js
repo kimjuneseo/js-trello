@@ -110,7 +110,7 @@ const viewCard = (viewCard) => {
         if(e.classList.contains('cardView__form--img'))    e.childNodes[0].src = data.result.image;
         if(e.classList.contains('cardView__view--content')) e.innerText = data.result.content ==='' ? '설명을 입력해주세요..' :  data.result.content;
       }
-    })
+    });
   }
 };
 
@@ -204,18 +204,18 @@ const DBCardModify = (key, name, value) => {
     let request = objectStore.get(key);
     request.onsuccess = e => {
       let data = e.target.result;
-      let card = document.querySelector(`.card[data-card='${key}'`);
-      
+      let card = name === 'title'? document.querySelector(`.cardTitle[data-card='${key}'`) : document.querySelector(`.card[data-card='${key}'`).childNodes[0];
+
       if(name === 'content')data.content = value;
       
       if(name === 'key') data.dataSet = value;
 
       if(name === 'title') {
         data.title = value;
-        card.childNodes[0].innerText = value;
+        card.innerText = value;
       }
       if(name === 'image'){
-        card.childNodes[0].src = value;
+        card.src = value;
         data.image = value;
       }
       let requestUpdate = objectStore.put(data);
@@ -278,11 +278,9 @@ list_popupWrap.addEventListener("click", e => {
   }
 });
 
-cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 cardView_popupWrap.addEventListener("click", e => {
   // 새로 만들때 마다 cardcnt 올라가서 그거 고쳐야함 하다가말았언
   let card = document.querySelector(`.card[data-card='${cardView_popupWrap.dataset.card}'`);
-
   if(e.target.classList.contains("cardView__form--title")){
     let input = elementChange(e.target, "title");
     input.classList.add('cardView__popup--title');
@@ -308,11 +306,11 @@ cardView_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
     listClear();
+    render('trello__card')
     return;
   }
-  card.remove();
-  render("trello__card");
 });
+cardViewOpenFileButton.addEventListener("change", e => onBase64File(e.target.files[0], true));
 
 openFileButton.addEventListener("change",(e) => onBase64File(e.target.files[0]));
 
