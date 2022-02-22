@@ -70,7 +70,6 @@ const listClear = () => list.forEach(e => e.childNodes[5].childNodes[3].innerHTM
 let cardDataSet;
 const onBase64File = (file, db) =>{
   let img = cardView_popupWrap.classList.contains('none') ? image : cardViewImage.childNodes[0];
-  console.log(img);
   let reader = new FileReader();
   reader.onload = function(){
     let result = reader.result;
@@ -124,7 +123,7 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
     listDataSet = parseInt(listDataSet);
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
-      list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img draggable="false" data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
+      list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
       image.src = '';
       card_cardForm.reset();
       cardCnt++;
@@ -211,7 +210,6 @@ const DBCardModify = (key, name, value) => {
     request.onsuccess = e => {
       let data = e.target.result;
       let card = name === 'title'? document.querySelector(`.cardTitle[data-card='${key}'`) : document.querySelector(`.card[data-card='${key}'`);
-      console.log(card);
 
       if(name === 'content')data.content = value;
       
@@ -222,11 +220,13 @@ const DBCardModify = (key, name, value) => {
         card.innerText = value;
       }
       if(name === 'image'){
-        console.log()
-        
-        // card.children
-        // card.childNodes[1]
-        card.src = value;
+        if(!card.childNodes[1]){
+          let img = createEl('img');
+          img.src = value;
+          img.classList.add('card__img');
+          cardView_listModifyForm.childNodes[9].innerHTML = `<label  class="card_btn card_btn1" for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
+        }
+        else card.childNodes[0].src = value;
         data.image = value;
       }
       let requestUpdate = objectStore.put(data);
