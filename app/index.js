@@ -484,7 +484,7 @@ const render = (name) => {
     }
   };
 };
- 
+
 const init = (() => {
   DBCreate();
 })(); 
