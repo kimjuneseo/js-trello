@@ -119,7 +119,8 @@ const viewCard = (viewCard) => {
 
 
 const addCard = (listDataSet, cardTitle, cardImg) => {
-  if(cardTitle !== ''){
+ 
+    console.log(cardTitle);
     listDataSet = parseInt(listDataSet);
     let list = document.querySelector(`.list[data-list='${listDataSet}'`);
     if(list){
@@ -128,14 +129,15 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
       card_cardForm.reset();
       cardCnt++;
     }
-  }
-};
-
+  };
+  
 const addCardListener = () => {
-  card_popupWrap.classList.toggle("none");
-  let card_title = card_cardForm.card.value;
-  DBAdd('trello__card', targetListNum, card_title, image.src.includes('noimage') ? '' : image.src    , '');
-  addCard(targetListNum, card_title, image.src.includes('noimage') ? '' : image.src);
+    if(cardTitle !== ''){
+      card_popupWrap.classList.toggle("none");
+      let card_title = card_cardForm.card.value;
+      DBAdd('trello__card', targetListNum, card_title, image.src.includes('noimage') ? '' : image.src    , '');
+      addCard(targetListNum, card_title, image.src.includes('noimage') ? '' : image.src);
+    }
 };
 
 // DB METHOD
@@ -162,6 +164,7 @@ const DBAdd = (tableName, dataSet, title, image, content) => {
   const tx = db.transaction(tableName, "readwrite");
   tx.onerror = e => console.log(`Error! ${e.target.error}`);
   const table = tx.objectStore(tableName);
+  console.log( data);
   table.add(data);
 };
 
@@ -317,7 +320,7 @@ cardView_popupWrap.addEventListener("click", e => {
     render('trello__card')
     return;
   }
-   
+  
   if(e.target.classList.contains('card_btn2')){
     // btn
     let cardImg = document.querySelector(`.card__img[data-card="${cardView_popupWrap.dataset.card}"]`);

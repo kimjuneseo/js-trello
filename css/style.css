@@ -77,3 +77,7 @@ input[type="file"]{display: none;}
 .card_btn{border: none; font-size: 1rem; padding: 4px; color: #fff;}
 .card_btn1{background: #0279bf;}
 .card_btn2{background: red;}
+
+.card_card_btn{border: none; font-size: 1rem; padding: 4px; color: #fff; background: #0279bf;}
+
+.cardView__form--title{height: 16px;}
