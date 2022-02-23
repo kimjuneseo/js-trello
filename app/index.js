@@ -318,6 +318,14 @@ cardView_popupWrap.addEventListener("click", e => {
     return;
   }
   
+  if(e.target.classList.contains('card_btn2')){
+    // btn
+    let cardImg = document.querySelector(`.card__img[data-card="${cardView_popupWrap.dataset.card}"]`);
+    cardImg.remove();
+    cardView__form.childNodes[9].innerHTML = ` <label  class="card_btn card_btn1 add__img" for="cardViewImage">이미지 추가</label>`;
+    cardView__form.childNodes[3].childNodes[0].src = '';
+    
+  }
 });
 
 let cardViewAddImg = document.querySelector('#cardViewImage');
