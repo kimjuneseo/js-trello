@@ -118,18 +118,16 @@ const viewCard = (viewCard) => {
 };
 
 
-const addCard = (listDataSet, cardTitle, cardImg) => {
- 
-    console.log(cardTitle);
-    listDataSet = parseInt(listDataSet);
-    let list = document.querySelector(`.list[data-list='${listDataSet}'`);
-    if(list){
-      list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
-      image.src = '';
-      card_cardForm.reset();
-      cardCnt++;
-    }
-  };
+const addCard = (listDataSet, cardTitle, cardImg) => { 
+  listDataSet = parseInt(listDataSet);
+  let list = document.querySelector(`.list[data-list='${listDataSet}'`);
+  if(list){
+    list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
+    image.src = '';
+    card_cardForm.reset();
+    cardCnt++;
+  }
+};
   
 const addCardListener = () => {
     if(cardTitle !== ''){
@@ -159,8 +157,9 @@ const DBCreate = () => {
       }
 }; 
 
+// db에는 listNum이라는 걸 추가 list
 const DBAdd = (tableName, dataSet, title, image, content) => {
-  const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image, content} 
+  const data = tableName === 'trello__list' ? {dataSet, title} : {cardCnt, dataSet, title, image, content};
   const tx = db.transaction(tableName, "readwrite");
   tx.onerror = e => console.log(`Error! ${e.target.error}`);
   const table = tx.objectStore(tableName);
