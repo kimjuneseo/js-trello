@@ -317,7 +317,7 @@ cardView_popupWrap.addEventListener("click", e => {
     render('trello__card')
     return;
   }
-  
+   
   if(e.target.classList.contains('card_btn2')){
     // btn
     let cardImg = document.querySelector(`.card__img[data-card="${cardView_popupWrap.dataset.card}"]`);
