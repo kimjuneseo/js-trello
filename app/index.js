@@ -122,20 +122,20 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
   listDataSet = parseInt(listDataSet);
   let list = document.querySelector(`.list[data-list='${listDataSet}'`);
   if(list){
+    if(cardTitle !== ''){
     list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
     image.src = '';
     card_cardForm.reset();
     cardCnt++;
+    }
   }
 };
   
 const addCardListener = () => {
-    if(cardTitle !== ''){
       card_popupWrap.classList.toggle("none");
       let card_title = card_cardForm.card.value;
       DBAdd('trello__card', targetListNum, card_title, image.src.includes('noimage') ? '' : image.src    , '');
       addCard(targetListNum, card_title, image.src.includes('noimage') ? '' : image.src);
-    }
 };
 
 // DB METHOD
