@@ -255,6 +255,14 @@ const listEventListener = (list)=> {
         
         if(list){
           // list remove
+          console.log();
+          if(e.target.classList.contains("list__title")){
+            // forEach3번돌아서 input 3개가 들어감 
+            let input = elementChange(e.target, e.currentTarget.dataset.list);
+            console.log(e.currentTarget.childNodes[5].childNodes[1].childNodes[2].before(input));
+            return;
+          }
+
           if(e.target.classList.contains("remove")){
             DBDeleteList(list.dataset.list);
             list.remove();
