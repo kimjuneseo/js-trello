@@ -254,7 +254,6 @@ const listEventListener = (list)=> {
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
         
         if(list){
-          //..
           // list remove
           if(e.target.classList.contains("list__title")){
             // forEach3번돌아서 input 3개가 들어감 
