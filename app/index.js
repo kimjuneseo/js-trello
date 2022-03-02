@@ -75,8 +75,8 @@ const onBase64File = (file, db) =>{
     let result = reader.result;
     img.src = result;
     if(db){
-      // DBCardModify 수정중 
-      DBCardModify(cardView_popupWrap.dataset.card, 'image', result);
+      // DBModify 수정중 
+      DBModify(cardView_popupWrap.dataset.card, 'image', result);
     }
 
     return result;
@@ -84,20 +84,22 @@ const onBase64File = (file, db) =>{
   reader.readAsDataURL(file); 
 };
 
-const elementChange = (target, keyName, db, key) => {
+const elementChange = (target, keyName) => {
+  let key =  cardView_popupWrap.classList.contains("none") ? target.closest(".list").dataset.list : cardView_popupWrap.dataset.card;
+  // console.log(key)
   target.remove();
   let input =  createEl('input');
   input.setAttribute('type', 'text');
   input.setAttribute('value', target.innerText);
-  const name = db;
   input.addEventListener("keydown", e => {
     if(window.event.keyCode === 13){
-      cardView_popupWrap.classList.contains("none") ? DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value) : DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value);
+      console.log(key)
+      DBModify(key, keyName, input.value, cardView_popupWrap.classList.contains("none") ? "trello__list" : undefined);
       input.blur();
     }
   });
   input.addEventListener("blur", e => {
-    DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value);
+    DBModify(key, keyName, input.value, cardView_popupWrap.classList.contains("none") ? "trello__list" : undefined);
   });
   return input;
 };
@@ -204,11 +206,12 @@ const DBDeleteCard = (key) => {
   };
   
 
-const DBCardModify = (key, name, value) => {
+const DBModify = (key, name, value, dbName = "trello__card") => {
+  console.log(key)
   key = parseInt(key);
   const request = indexedDB.open('Trello', 1);
   request.onsuccess = e => {
-    let objectStore = db.transaction("trello__card", "readwrite").objectStore("trello__card");
+    let objectStore = db.transaction(dbName, "readwrite").objectStore(dbName);
     let request = objectStore.get(key);
     request.onsuccess = e => {
       let data = e.target.result;
@@ -220,12 +223,12 @@ const DBCardModify = (key, name, value) => {
 
       if(name === 'title') {
         data.title = value;
-        card.innerText = value;
+        dbName === "trello__list" ? false : card.innerText = value;
       }
       if(name === 'image'){
         if(!card.childNodes[1]){
           let img = createEl('img');
-          console.log(value);
+          // console.log(value);
           img.src = value;
           img.classList.add('card__img');
           cardView_listModifyForm.childNodes[9].innerHTML = `<label  class="card_btn card_btn1 " for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
@@ -258,7 +261,7 @@ const listEventListener = (list)=> {
           if(e.target.classList.contains("list__title")){
             if(list.childNodes[5].childNodes[1].childNodes[1].classList){
               // 수정할때 db이름 바꿔서 넣어주기
-              let input = elementChange(e.target, e.currentTarget.dataset.list);
+              let input = elementChange(e.target, "title");
               input.classList.add("list__input--title");
               e.currentTarget.childNodes[5].childNodes[1].childNodes[2].before(input);
             }
@@ -338,7 +341,7 @@ cardView_popupWrap.addEventListener("click", e => {
     cardImg.remove();
     cardView__form.childNodes[9].innerHTML = ` <label  class="card_btn card_btn1 add__img" for="cardViewImage">이미지 추가</label>`;
     cardView__form.childNodes[3].childNodes[0].src = '';
-    DBCardModify(cardView_popupWrap.dataset.card, 'image', ''); 
+    DBModify(cardView_popupWrap.dataset.card, 'image', ''); 
     listClear();
     render('trello__card');
     return;
@@ -472,7 +475,7 @@ window.onmousemove = (e) => {
 };
 
 window.onmouseup = (e) => {
-  if (isDown) {
+  if(isDown) {
     isDown = false;
     clone.remove(); 
     clone.removeAttribute('style'); 
@@ -484,7 +487,7 @@ window.onmouseup = (e) => {
       viewCard(mouseCardDataSet);
       return;
     }
-    DBCardModify(mouseCardDataSet, 'key', mouseListDataSet);
+    DBModify(mouseCardDataSet, 'key', mouseListDataSet);
   }
 };
 
