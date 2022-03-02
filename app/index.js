@@ -252,14 +252,13 @@ const listEventListener = (list)=> {
     list.forEach(el => {
       el.addEventListener("click", (e) => {
         let list = document.querySelector(`.list[data-list='${e.currentTarget.dataset.list}'`);
-        
         if(list){
-          // list remove
           if(e.target.classList.contains("list__title")){
-            // forEach3번돌아서 input 3개가 들어감 
-            let input = elementChange(e.target, e.currentTarget.dataset.list);
-            console.log(e.currentTarget.childNodes[5].childNodes[1].childNodes[2]);
-            
+            if(list.childNodes[5].childNodes[1].childNodes[1].classList){
+              let input = elementChange(e.target, e.currentTarget.dataset.list);
+              input.classList.add("list__input--title");
+              e.currentTarget.childNodes[5].childNodes[1].childNodes[2].before(input);
+            }
             return;
           }
 

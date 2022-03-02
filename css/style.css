@@ -81,3 +81,5 @@ input[type="file"]{display: none;}
 .card_card_btn{border: none; font-size: 1rem; padding: 4px; color: #fff; background: #0279bf;}
 
 .cardView__form--title{height: 16px;}
+
+.list__input--title{ border: none; height: 50px; background: none; font-weight: 600; font-size: 1rem; }
