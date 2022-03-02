@@ -327,15 +327,18 @@ cardView_popupWrap.addEventListener("click", e => {
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
+    render("trello__card");
+    listClear();
     return;
   }
   
   if(e.target.classList.contains('card_btn2')){
     let cardImg = document.querySelector(`.card__img[data-card="${cardView_popupWrap.dataset.card}"]`);
-    cardImg.remove();
-    console.log(cardView__form.childNodes[9].innerHTML)
     cardView__form.childNodes[9].innerHTML = ` <label  class="card_btn card_btn1 add__img" for="cardViewImage">이미지 추가</label>`;
     cardView__form.childNodes[3].childNodes[0].src = '';
+    DBModify(cardView_popupWrap.dataset.card, "image", '');
+    console.log()
+    cardImg.remove();
     return;
   }
 });
