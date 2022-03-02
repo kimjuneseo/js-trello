@@ -510,6 +510,4 @@ const render = (name) => {
   };
 };
 
-const init = (() => {
-  DBCreate();
-})(); 
+const init = (() => DBCreate())(); 
