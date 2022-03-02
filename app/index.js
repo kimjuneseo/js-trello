@@ -84,14 +84,15 @@ const onBase64File = (file, db) =>{
   reader.readAsDataURL(file); 
 };
 
-const elementChange = (target, keyName) => {
+const elementChange = (target, keyName, db, key) => {
   target.remove();
   let input =  createEl('input');
   input.setAttribute('type', 'text');
   input.setAttribute('value', target.innerText);
+  const name = db;
   input.addEventListener("keydown", e => {
     if(window.event.keyCode === 13){
-      DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value);
+      cardView_popupWrap.classList.contains("none") ? DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value) : DBCardModify(cardView_popupWrap.dataset.card, keyName, input.value);
       input.blur();
     }
   });
@@ -123,6 +124,7 @@ const addCard = (listDataSet, cardTitle, cardImg) => {
   let list = document.querySelector(`.list[data-list='${listDataSet}'`);
   if(list){
     if(cardTitle !== ''){
+    // console.log(cardImg); 
     list.childNodes[5].childNodes[3].innerHTML += cardImg === '' ? `<div class="card" data-card="${cardCnt}"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>` : `<div class="card" data-card="${cardCnt}"><img data-card="${cardCnt}" src="${cardImg}" alt="card__img" class="card__img" id="card__add--img"><p class="cardTitle" data-card="${cardCnt}">${cardTitle}</p></div>`;
     image.src = '';
     card_cardForm.reset();
@@ -163,7 +165,6 @@ const DBAdd = (tableName, dataSet, title, image, content) => {
   const tx = db.transaction(tableName, "readwrite");
   tx.onerror = e => console.log(`Error! ${e.target.error}`);
   const table = tx.objectStore(tableName);
-  console.log( data);
   table.add(data);
 };
 
@@ -224,9 +225,10 @@ const DBCardModify = (key, name, value) => {
       if(name === 'image'){
         if(!card.childNodes[1]){
           let img = createEl('img');
+          console.log(value);
           img.src = value;
           img.classList.add('card__img');
-          cardView_listModifyForm.childNodes[9].innerHTML = `<label  class="card_btn card_btn1" for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
+          cardView_listModifyForm.childNodes[9].innerHTML = `<label  class="card_btn card_btn1 " for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
         }
         else card.childNodes[0].src = value;
         data.image = value;
@@ -317,23 +319,28 @@ cardView_popupWrap.addEventListener("click", e => {
   if(e.target.classList.contains('cardView__add--btn')){
     cardView_popupWrap.classList.toggle('none');
     DBDeleteCard(cardDataSet, true);
+    listClear();
+    render('trello__card');
     return;
   }
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
     listClear();
-    render('trello__card')
+    render('trello__card');
     return;
   }
   
   if(e.target.classList.contains('card_btn2')){
-    // btn
+    // btn 고쳐야함 이미지 삭제시 이상하게뜸
     let cardImg = document.querySelector(`.card__img[data-card="${cardView_popupWrap.dataset.card}"]`);
     cardImg.remove();
     cardView__form.childNodes[9].innerHTML = ` <label  class="card_btn card_btn1 add__img" for="cardViewImage">이미지 추가</label>`;
     cardView__form.childNodes[3].childNodes[0].src = '';
     DBCardModify(cardView_popupWrap.dataset.card, 'image', ''); 
+    listClear();
+    render('trello__card');
+    return;
   }
 });
 
