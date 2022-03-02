@@ -228,12 +228,13 @@ const DBModify = (key, name, value, dbName = "trello__card") => {
       if(name === 'image'){
         if(!card.childNodes[1]){
           let img = createEl('img');
-          // console.log(value);
-          img.src = value;
           img.classList.add('card__img');
+          listClear();
+          render('trello__card');
           cardView_listModifyForm.childNodes[9].innerHTML = `<label  class="card_btn card_btn1 " for="cardViewopenFile">이미지 수정</label> <button class="card_btn card_btn2">이미지 삭제</button>`;
         }
         else card.childNodes[0].src = value;
+        console.log(value)
         data.image = value;
       }
       let requestUpdate = objectStore.put(data);
@@ -322,28 +323,20 @@ cardView_popupWrap.addEventListener("click", e => {
   
   if(e.target.classList.contains('cardView__add--btn')){
     cardView_popupWrap.classList.toggle('none');
-    DBDeleteCard(cardDataSet, true);
-    listClear();
-    render('trello__card');
     return;
   }
   
   if(e.target.classList.contains('cardView__cancel--btn')){
     cardView_popupWrap.classList.toggle('none');
-    listClear();
-    render('trello__card');
     return;
   }
   
   if(e.target.classList.contains('card_btn2')){
-    // btn 고쳐야함 이미지 삭제시 이상하게뜸
     let cardImg = document.querySelector(`.card__img[data-card="${cardView_popupWrap.dataset.card}"]`);
     cardImg.remove();
     cardView__form.childNodes[9].innerHTML = ` <label  class="card_btn card_btn1 add__img" for="cardViewImage">이미지 추가</label>`;
     cardView__form.childNodes[3].childNodes[0].src = '';
     DBModify(cardView_popupWrap.dataset.card, 'image', ''); 
-    listClear();
-    render('trello__card');
     return;
   }
 });
