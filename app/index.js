@@ -257,6 +257,7 @@ const listEventListener = (list)=> {
         if(list){
           if(e.target.classList.contains("list__title")){
             if(list.childNodes[5].childNodes[1].childNodes[1].classList){
+              // 수정할때 db이름 바꿔서 넣어주기
               let input = elementChange(e.target, e.currentTarget.dataset.list);
               input.classList.add("list__input--title");
               e.currentTarget.childNodes[5].childNodes[1].childNodes[2].before(input);
